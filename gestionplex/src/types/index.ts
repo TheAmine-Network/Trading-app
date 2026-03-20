@@ -1,6 +1,6 @@
 // Types globaux GestionPlex
 
-export type TypeImmeuble = "TRIPLEX" | "DUPLEX";
+export type TypeImmeuble = "TRIPLEX" | "DUPLEX" | "QUADRUPLEX" | "IMMEUBLE" | "MAISON" | "CONDO";
 export type StatutLogement = "OCCUPE" | "VACANT" | "EN_RENOVATION";
 export type StatutLocataire = "ACTIF" | "ANCIEN" | "EN_ATTENTE";
 export type StatutBail = "ACTIF" | "EXPIRE" | "EN_RENOUVELLEMENT";
@@ -86,6 +86,8 @@ export interface Logement {
   inclRangement: boolean;
   photos: string[];
   notes?: string;
+  /** Unité occupée par le propriétaire — pas de loyer perçu */
+  proprietaireOccupant?: boolean;
   createdAt: Date;
   updatedAt: Date;
   immeuble?: Immeuble;

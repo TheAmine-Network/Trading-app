@@ -47,6 +47,29 @@ export const immeubles: Immeuble[] = [
     createdAt: new Date("2021-03-22"),
     updatedAt: new Date("2024-02-05"),
   },
+  {
+    id: "imm_duplex_anjou",
+    nom: "Duplex Anjou — Sublaines",
+    adresse: "8450-8452, avenue Sublaines",
+    ville: "Montréal (Anjou)",
+    province: "QC",
+    codePostal: "H1K 2B9",
+    type: "DUPLEX",
+    anneeConstruct: 1960,
+    nbLogements: 2,
+    photoUrl: "https://images.unsplash.com/photo-1558618666-fcd25c85cd64?w=800",
+    dateAchat: new Date("2026-03-20"),
+    prixAchat: 829000,
+    valeurMunicipale: 774000,
+    numeroLot: "1112216",
+    notes:
+      "Duplex jumelé construit en 1960. Brique/vinyle, fondation béton coulé, garage chauffé intégré, allée asphaltée. " +
+      "Certificat de localisation 2022. " +
+      "Chauffage au mazout — conversion thermopompe planifiée. " +
+      "Propriétaire occupe le bas (8450). Unité du haut (8452) à louer.",
+    createdAt: new Date("2026-03-20"),
+    updatedAt: new Date("2026-03-20"),
+  },
 ];
 
 // ─── LOGEMENTS ───────────────────────────────────────────────────────────────
@@ -109,6 +132,53 @@ export const logements: Logement[] = [
     notes: "4½. Vue sur le parc Rosemont.",
     createdAt: new Date("2018-06-15"),
     updatedAt: new Date("2024-01-01"),
+  },
+  // Duplex Anjou — 8452 (haut, vacant, à louer)
+  {
+    id: "log_anj_haut",
+    immeubleId: "imm_duplex_anjou",
+    numero: "8452 — Haut",
+    superficie: 1087, // 2174 pi² / 2 (estimation)
+    nbChambres: 4,
+    nbSallesBain: 2,
+    statut: "EN_RENOVATION",
+    loyerMensuel: 0, // Vacant — valeur locative cible 2 750$
+    inclChauffage: true,
+    inclEauChaude: false,
+    inclElectricite: false,
+    inclStationnement: false,
+    inclRangement: false,
+    proprietaireOccupant: false,
+    photos: [],
+    notes:
+      "7 pièces, 4 chambres, 2 SDB, inst. lav/séch. Vacant. Valeur locative cible: 2 750 $/mois. " +
+      "Rénovations en cours : planchers, SDB, cuisine, mise à terre élec, sortie sécheuse.",
+    createdAt: new Date("2026-03-20"),
+    updatedAt: new Date("2026-03-20"),
+  },
+  // Duplex Anjou — 8450 (bas, propriétaire occupant)
+  {
+    id: "log_anj_bas",
+    immeubleId: "imm_duplex_anjou",
+    numero: "8450 — Bas (propriétaire)",
+    superficie: 1087,
+    nbChambres: 3,
+    nbSallesBain: 1,
+    statut: "EN_RENOVATION",
+    loyerMensuel: 0, // Propriétaire occupant
+    inclChauffage: true,
+    inclEauChaude: false,
+    inclElectricite: false,
+    inclStationnement: true,
+    inclRangement: false,
+    proprietaireOccupant: true,
+    photos: [],
+    notes:
+      "5 pièces, 3 chambres, 1 SDB, inst. lav/séch, garage chauffé intégré. " +
+      "Habité par le propriétaire. Valeur locative: 2 250 $/mois. " +
+      "Rénovations en cours : planchers, SDB, cuisine, mise à terre élec, sortie sécheuse.",
+    createdAt: new Date("2026-03-20"),
+    updatedAt: new Date("2026-03-20"),
   },
   // Duplex Villeray
   {
@@ -469,6 +539,38 @@ function genererTransactions(): Transaction[] {
       recurrent: true,
       createdAt: new Date(maintenant.getFullYear(), 2, 22),
       updatedAt: new Date(maintenant.getFullYear(), 2, 22),
+    },
+    // ── Duplex Anjou ─────────────────────────────────────────────────────────
+    {
+      id: "tx_achat_anjou",
+      immeubleId: "imm_duplex_anjou",
+      type: "DEPENSE",
+      categorie: "AUTRE",
+      montant: 829000,
+      date: new Date("2026-03-20"),
+      description: "Achat — 8450-8452 av. Sublaines, Anjou (Centris 10602915)",
+      fournisseur: "Notaire",
+      methodePaiement: "VIREMENT",
+      recurrent: false,
+      createdAt: new Date("2026-03-20"),
+      updatedAt: new Date("2026-03-20"),
+    },
+    // Assurance mensuelle 160$/mois = 1 920$/an
+    {
+      id: "tx_assurance_anjou",
+      immeubleId: "imm_duplex_anjou",
+      type: "DEPENSE",
+      categorie: "ASSURANCE",
+      montant: 160,
+      date: new Date(maintenant.getFullYear(), maintenant.getMonth(), 1),
+      description: "Assurance habitation mensuelle — Duplex Anjou",
+      fournisseur: "Intact Assurance",
+      methodePaiement: "PRELEVEMENT",
+      recurrent: true,
+      recurrenceJour: 1,
+      notes: "160 $/mois = 1 920 $/an",
+      createdAt: new Date("2026-03-20"),
+      updatedAt: new Date("2026-03-20"),
     }
   );
 
