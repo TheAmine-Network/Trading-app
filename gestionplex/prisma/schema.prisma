@@ -1,0 +1,288 @@
+// GestionPlex — Schéma Prisma
+// Application de gestion immobilière personnelle
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+// ─────────────────────────────────────────────
+// ENUMS
+// ─────────────────────────────────────────────
+
+enum TypeImmeuble {
+  TRIPLEX
+  DUPLEX
+}
+
+enum StatutLogement {
+  OCCUPE
+  VACANT
+  EN_RENOVATION
+}
+
+enum StatutLocataire {
+  ACTIF
+  ANCIEN
+  EN_ATTENTE
+}
+
+enum StatutBail {
+  ACTIF
+  EXPIRE
+  EN_RENOUVELLEMENT
+}
+
+enum TypeTransaction {
+  REVENU
+  DEPENSE
+}
+
+enum CategorieTransaction {
+  LOYER
+  STATIONNEMENT
+  BUANDERIE
+  REPARATION
+  ASSURANCE
+  TAXES_MUNICIPALES
+  TAXES_SCOLAIRES
+  HYPOTHEQUE
+  DENEIGEMENT
+  ENTRETIEN
+  RENOVATION
+  ELECTRICITE
+  GAZ
+  AUTRE
+}
+
+enum MethodePaiement {
+  VIREMENT
+  CHEQUE
+  COMPTANT
+  PRELEVEMENT
+}
+
+enum PrioriteEntretien {
+  URGENTE
+  HAUTE
+  NORMALE
+  BASSE
+}
+
+enum StatutEntretien {
+  NOUVELLE
+  EN_COURS
+  EN_ATTENTE_PIECE
+  TERMINEE
+  ANNULEE
+}
+
+enum CategorieEntretien {
+  PLOMBERIE
+  ELECTRICITE
+  CHAUFFAGE
+  STRUCTURE
+  APPAREILS
+  PEINTURE
+  EXTERIEUR
+  AUTRE
+}
+
+enum TypeDocument {
+  BAIL
+  ASSURANCE
+  TAXE
+  FACTURE
+  PHOTO
+  INSPECTION
+  AUTRE
+}
+
+enum StatutRappel {
+  ACTIF
+  COMPLETE
+  REPORTE
+}
+
+enum FrequenceRappel {
+  QUOTIDIEN
+  HEBDOMADAIRE
+  MENSUEL
+  ANNUEL
+}
+
+// ─────────────────────────────────────────────
+// MODÈLES
+// ─────────────────────────────────────────────
+
+model Immeuble {
+  id               String        @id @default(cuid())
+  nom              String
+  adresse          String
+  ville            String        @default("Montréal")
+  province         String        @default("QC")
+  codePostal       String
+  type             TypeImmeuble
+  anneeConstruct   Int?
+  nbLogements      Int
+  photoUrl         String?
+  notes            String?
+  dateAchat        DateTime?
+  prixAchat        Decimal?      @db.Decimal(12, 2)
+  valeurMunicipale Decimal?      @db.Decimal(12, 2)
+  numeroLot        String?
+  createdAt        DateTime      @default(now())
+  updatedAt        DateTime      @updatedAt
+
+  logements        Logement[]
+  transactions     Transaction[]
+  documents        Document[]
+  rappels          Rappel[]
+}
+
+model Logement {
+  id                String          @id @default(cuid())
+  immeubleId        String
+  numero            String
+  superficie        Float?
+  nbChambres        Int             @default(1)
+  nbSallesBain      Float           @default(1)
+  statut            StatutLogement  @default(VACANT)
+  loyerMensuel      Decimal         @db.Decimal(10, 2)
+  inclChauffage     Boolean         @default(false)
+  inclEauChaude     Boolean         @default(false)
+  inclElectricite   Boolean         @default(false)
+  inclStationnement Boolean         @default(false)
+  inclRangement     Boolean         @default(false)
+  photos            String[]
+  notes             String?
+  createdAt         DateTime        @default(now())
+  updatedAt         DateTime        @updatedAt
+
+  immeuble          Immeuble        @relation(fields: [immeubleId], references: [id], onDelete: Cascade)
+  locataires        Locataire[]
+  baux              Bail[]
+  transactions      Transaction[]
+  demandesEntretien DemandeEntretien[]
+  documents         Document[]
+}
+
+model Locataire {
+  id               String           @id @default(cuid())
+  logementId       String?
+  prenom           String
+  nom              String
+  email            String?
+  telephone        String?
+  telephoneUrgence String?
+  dateNaissance    DateTime?
+  statut           StatutLocataire  @default(ACTIF)
+  notes            String?
+  createdAt        DateTime         @default(now())
+  updatedAt        DateTime         @updatedAt
+
+  logement          Logement?        @relation(fields: [logementId], references: [id])
+  baux              Bail[]
+  demandesEntretien DemandeEntretien[]
+}
+
+model Bail {
+  id                 String      @id @default(cuid())
+  logementId         String
+  locataireId        String
+  dateDebut          DateTime
+  dateFin            DateTime
+  loyerMensuel       Decimal     @db.Decimal(10, 2)
+  depot              Decimal?    @db.Decimal(10, 2)
+  clausesSpeciales   String?
+  documentUrl        String?
+  statut             StatutBail  @default(ACTIF)
+  augmentationAnnuelle Float?
+  sectionG           Boolean     @default(false)
+  createdAt          DateTime    @default(now())
+  updatedAt          DateTime    @updatedAt
+
+  logement           Logement    @relation(fields: [logementId], references: [id], onDelete: Cascade)
+  locataire          Locataire   @relation(fields: [locataireId], references: [id], onDelete: Cascade)
+  rappels            Rappel[]
+}
+
+model Transaction {
+  id              String               @id @default(cuid())
+  immeubleId      String
+  logementId      String?
+  type            TypeTransaction
+  categorie       CategorieTransaction
+  montant         Decimal              @db.Decimal(10, 2)
+  date            DateTime
+  description     String
+  recuUrl         String?
+  fournisseur     String?
+  methodePaiement MethodePaiement?
+  recurrent       Boolean              @default(false)
+  recurrenceJour  Int?
+  notes           String?
+  createdAt       DateTime             @default(now())
+  updatedAt       DateTime             @updatedAt
+
+  immeuble        Immeuble             @relation(fields: [immeubleId], references: [id], onDelete: Cascade)
+  logement        Logement?            @relation(fields: [logementId], references: [id])
+}
+
+model DemandeEntretien {
+  id                 String             @id @default(cuid())
+  logementId         String
+  locataireId        String?
+  titre              String
+  description        String
+  priorite           PrioriteEntretien  @default(NORMALE)
+  statut             StatutEntretien    @default(NOUVELLE)
+  categorie          CategorieEntretien @default(AUTRE)
+  photos             String[]
+  dateOuverture      DateTime           @default(now())
+  dateFermeture      DateTime?
+  cout               Decimal?           @db.Decimal(10, 2)
+  fournisseurAssigne String?
+  notes              String?
+  createdAt          DateTime           @default(now())
+  updatedAt          DateTime           @updatedAt
+
+  logement           Logement           @relation(fields: [logementId], references: [id], onDelete: Cascade)
+  locataire          Locataire?         @relation(fields: [locataireId], references: [id])
+}
+
+model Document {
+  id            String       @id @default(cuid())
+  immeubleId    String?
+  logementId    String?
+  nom           String
+  type          TypeDocument
+  fichierUrl    String
+  tailleFichier Int?
+  mimeType      String?
+  tags          String[]
+  createdAt     DateTime     @default(now())
+
+  immeuble      Immeuble?    @relation(fields: [immeubleId], references: [id])
+  logement      Logement?    @relation(fields: [logementId], references: [id])
+}
+
+model Rappel {
+  id          String          @id @default(cuid())
+  titre       String
+  description String?
+  date        DateTime
+  recurrent   Boolean         @default(false)
+  frequence   FrequenceRappel?
+  immeubleId  String?
+  logementId  String?
+  bailId      String?
+  statut      StatutRappel    @default(ACTIF)
+  createdAt   DateTime        @default(now())
+
+  immeuble    Immeuble?       @relation(fields: [immeubleId], references: [id])
+  bail        Bail?           @relation(fields: [bailId], references: [id])
+}
