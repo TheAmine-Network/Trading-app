@@ -1,4 +1,4 @@
-import Anthropic from "@anthropic-ai/sdk";
+import Groq from "groq-sdk";
 import { NextRequest } from "next/server";
 import {
   immeubles,
@@ -11,8 +11,8 @@ import {
   getTauxOccupation,
 } from "@/lib/mock-data";
 
-const client = new Anthropic({
-  apiKey: process.env.ANTHROPIC_API_KEY,
+const client = new Groq({
+  apiKey: process.env.GROQ_API_KEY,
 });
 
 const SYSTEM_PROMPT = `Tu es **Plex**, l'assistant IA de GestionPlex — une application de gestion immobilière pour des propriétaires montréalais.
@@ -44,81 +44,91 @@ Tu aides le propriétaire (Amine) à :
 
 // ─── Outils disponibles ───────────────────────────────────────────────────────
 
-const tools: Anthropic.Tool[] = [
+const tools: Groq.Chat.ChatCompletionTool[] = [
   {
-    name: "get_stats_overview",
-    description: "Obtenir un résumé global : taux d'occupation, revenus du mois, dépenses, profit net, nb de demandes d'entretien ouvertes",
-    input_schema: {
-      type: "object" as const,
-      properties: {},
-      required: [],
+    type: "function",
+    function: {
+      name: "get_stats_overview",
+      description: "Obtenir un résumé global : taux d'occupation, revenus du mois, dépenses, profit net, nb de demandes d'entretien ouvertes",
+      parameters: { type: "object", properties: {}, required: [] },
     },
   },
   {
-    name: "search_tenants",
-    description: "Chercher des locataires par nom, statut, ou immeuble",
-    input_schema: {
-      type: "object" as const,
-      properties: {
-        query: { type: "string", description: "Nom ou partie du nom du locataire" },
-        statut: { type: "string", enum: ["ACTIF", "ANCIEN", "EN_ATTENTE"], description: "Filtrer par statut" },
-      },
-      required: [],
-    },
-  },
-  {
-    name: "get_finances",
-    description: "Obtenir les transactions financières récentes, revenus et dépenses par période",
-    input_schema: {
-      type: "object" as const,
-      properties: {
-        type: { type: "string", enum: ["REVENU", "DEPENSE", "TOUS"], description: "Type de transactions" },
-        categorie: { type: "string", description: "Catégorie (LOYER, REPARATION, etc.)" },
-        limit: { type: "number", description: "Nombre de transactions à retourner (défaut: 10)" },
-      },
-      required: [],
-    },
-  },
-  {
-    name: "get_maintenance",
-    description: "Lister les demandes d'entretien actives ou par statut/priorité",
-    input_schema: {
-      type: "object" as const,
-      properties: {
-        statut: { type: "string", enum: ["NOUVELLE", "EN_COURS", "EN_ATTENTE_PIECE", "TERMINEE", "ANNULEE", "OUVERTES"], description: "Filtrer par statut" },
-        priorite: { type: "string", enum: ["URGENTE", "HAUTE", "NORMALE", "BASSE"], description: "Filtrer par priorité" },
-      },
-      required: [],
-    },
-  },
-  {
-    name: "get_buildings",
-    description: "Obtenir des informations sur les immeubles et logements",
-    input_schema: {
-      type: "object" as const,
-      properties: {
-        immeubleId: { type: "string", description: "ID de l'immeuble spécifique (optionnel)" },
-      },
-      required: [],
-    },
-  },
-  {
-    name: "prepare_action",
-    description: "Préparer une action à effectuer (transaction, entretien, rappel) — retourne les données formatées pour l'utilisateur",
-    input_schema: {
-      type: "object" as const,
-      properties: {
-        type: {
-          type: "string",
-          enum: ["NOUVELLE_TRANSACTION", "NOUVELLE_ENTRETIEN", "NOUVEAU_RAPPEL"],
-          description: "Type d'action",
-        },
-        donnees: {
-          type: "object",
-          description: "Données de l'action (montant, locataire, description, etc.)",
+    type: "function",
+    function: {
+      name: "search_tenants",
+      description: "Chercher des locataires par nom, statut, ou immeuble",
+      parameters: {
+        type: "object",
+        properties: {
+          query: { type: "string", description: "Nom ou partie du nom du locataire" },
+          statut: { type: "string", enum: ["ACTIF", "ANCIEN", "EN_ATTENTE"], description: "Filtrer par statut" },
         },
       },
-      required: ["type", "donnees"],
+    },
+  },
+  {
+    type: "function",
+    function: {
+      name: "get_finances",
+      description: "Obtenir les transactions financières récentes, revenus et dépenses par période",
+      parameters: {
+        type: "object",
+        properties: {
+          type: { type: "string", enum: ["REVENU", "DEPENSE", "TOUS"], description: "Type de transactions" },
+          categorie: { type: "string", description: "Catégorie (LOYER, REPARATION, etc.)" },
+          limit: { type: "number", description: "Nombre de transactions à retourner (défaut: 10)" },
+        },
+      },
+    },
+  },
+  {
+    type: "function",
+    function: {
+      name: "get_maintenance",
+      description: "Lister les demandes d'entretien actives ou par statut/priorité",
+      parameters: {
+        type: "object",
+        properties: {
+          statut: { type: "string", enum: ["NOUVELLE", "EN_COURS", "EN_ATTENTE_PIECE", "TERMINEE", "ANNULEE", "OUVERTES"], description: "Filtrer par statut" },
+          priorite: { type: "string", enum: ["URGENTE", "HAUTE", "NORMALE", "BASSE"], description: "Filtrer par priorité" },
+        },
+      },
+    },
+  },
+  {
+    type: "function",
+    function: {
+      name: "get_buildings",
+      description: "Obtenir des informations sur les immeubles et logements",
+      parameters: {
+        type: "object",
+        properties: {
+          immeubleId: { type: "string", description: "ID de l'immeuble spécifique (optionnel)" },
+        },
+      },
+    },
+  },
+  {
+    type: "function",
+    function: {
+      name: "prepare_action",
+      description: "Préparer une action à effectuer (transaction, entretien, rappel) — retourne les données formatées pour l'utilisateur",
+      parameters: {
+        type: "object",
+        properties: {
+          type: {
+            type: "string",
+            enum: ["NOUVELLE_TRANSACTION", "NOUVELLE_ENTRETIEN", "NOUVEAU_RAPPEL"],
+            description: "Type d'action",
+          },
+          donnees: {
+            type: "object",
+            description: "Données de l'action (montant, locataire, description, etc.)",
+          },
+        },
+        required: ["type", "donnees"],
+      },
     },
   },
 ];
@@ -154,7 +164,6 @@ function executerOutil(name: string, input: Record<string, unknown>): string {
     case "search_tenants": {
       const { query, statut } = input as { query?: string; statut?: string };
       let resultats = [...locataires];
-
       if (query) {
         const q = query.toLowerCase();
         resultats = resultats.filter(l =>
@@ -163,11 +172,7 @@ function executerOutil(name: string, input: Record<string, unknown>): string {
           l.email?.toLowerCase().includes(q)
         );
       }
-
-      if (statut) {
-        resultats = resultats.filter(l => l.statut === statut);
-      }
-
+      if (statut) resultats = resultats.filter(l => l.statut === statut);
       return JSON.stringify(resultats.map(l => ({
         id: l.id,
         nom: `${l.prenom} ${l.nom}`,
@@ -181,20 +186,12 @@ function executerOutil(name: string, input: Record<string, unknown>): string {
     case "get_finances": {
       const { type, categorie, limit = 10 } = input as { type?: string; categorie?: string; limit?: number };
       let txs = [...transactions];
-
-      if (type && type !== "TOUS") {
-        txs = txs.filter(t => t.type === type);
-      }
-      if (categorie) {
-        txs = txs.filter(t => t.categorie === categorie);
-      }
-
+      if (type && type !== "TOUS") txs = txs.filter(t => t.type === type);
+      if (categorie) txs = txs.filter(t => t.categorie === categorie);
       txs.sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime());
       txs = txs.slice(0, limit);
-
       const totalRevenus = txs.filter(t => t.type === "REVENU").reduce((s, t) => s + t.montant, 0);
       const totalDepenses = txs.filter(t => t.type === "DEPENSE").reduce((s, t) => s + t.montant, 0);
-
       return JSON.stringify({
         transactions: txs.map(t => ({
           id: t.id,
@@ -211,22 +208,16 @@ function executerOutil(name: string, input: Record<string, unknown>): string {
     case "get_maintenance": {
       const { statut, priorite } = input as { statut?: string; priorite?: string };
       let demandes = [...demandesEntretien];
-
       if (statut === "OUVERTES") {
         demandes = demandes.filter(d => !["TERMINEE", "ANNULEE"].includes(d.statut));
       } else if (statut) {
         demandes = demandes.filter(d => d.statut === statut);
       }
-
-      if (priorite) {
-        demandes = demandes.filter(d => d.priorite === priorite);
-      }
-
+      if (priorite) demandes = demandes.filter(d => d.priorite === priorite);
       demandes.sort((a, b) => {
         const ordre = ["URGENTE", "HAUTE", "NORMALE", "BASSE"];
         return ordre.indexOf(a.priorite) - ordre.indexOf(b.priorite);
       });
-
       return JSON.stringify(demandes.map(d => {
         const log = logements.find(l => l.id === d.logementId);
         const imm = immeubles.find(i => i.id === log?.immeubleId);
@@ -247,12 +238,10 @@ function executerOutil(name: string, input: Record<string, unknown>): string {
     case "get_buildings": {
       const { immeubleId } = input as { immeubleId?: string };
       const imms = immeubleId ? immeubles.filter(i => i.id === immeubleId) : immeubles;
-
       return JSON.stringify(imms.map(i => {
         const logs = logements.filter(l => l.immeubleId === i.id);
         const occupes = logs.filter(l => l.statut === "OCCUPE");
         const revenusMensuels = occupes.reduce((s, l) => s + l.loyerMensuel, 0);
-
         return {
           id: i.id,
           nom: i.nom,
@@ -300,68 +289,66 @@ export async function POST(request: NextRequest) {
     return new Response("Messages invalides", { status: 400 });
   }
 
-  // Vérifier la clé API
-  if (!process.env.ANTHROPIC_API_KEY) {
+  if (!process.env.GROQ_API_KEY) {
     return new Response(
       JSON.stringify({
-        content: "⚠️ Clé API Anthropic manquante. Ajoutez `ANTHROPIC_API_KEY` dans votre `.env.local` pour activer le chatbot.",
+        content: "⚠️ Clé API Groq manquante. Créez un compte gratuit sur groq.com et ajoutez `GROQ_API_KEY` dans `.env.local`.",
       }),
       { headers: { "Content-Type": "application/json" } }
     );
   }
 
-  // Streamer la réponse
   const encoder = new TextEncoder();
   const stream = new ReadableStream({
     async start(controller) {
       try {
-        let currentMessages: Anthropic.MessageParam[] = messages.map(m => ({
-          role: m.role,
-          content: m.content,
-        }));
+        let currentMessages: Groq.Chat.ChatCompletionMessageParam[] = [
+          ...messages.map(m => ({ role: m.role, content: m.content } as Groq.Chat.ChatCompletionMessageParam)),
+        ];
 
         // Boucle agent avec outils
         while (true) {
-          const response = await client.messages.create({
-            model: "claude-sonnet-4-6",
+          const response = await client.chat.completions.create({
+            model: "llama-3.3-70b-versatile",
             max_tokens: 1024,
-            system: SYSTEM_PROMPT,
+            messages: [
+              { role: "system", content: SYSTEM_PROMPT },
+              ...currentMessages,
+            ],
             tools,
-            messages: currentMessages,
+            tool_choice: "auto",
           });
 
-          if (response.stop_reason === "tool_use") {
-            // Exécuter les outils demandés
-            const toolUseBlocks = response.content.filter(
-              (b): b is Anthropic.ToolUseBlock => b.type === "tool_use"
-            );
+          const choice = response.choices[0];
 
-            const toolResults: Anthropic.ToolResultBlockParam[] = toolUseBlocks.map(block => ({
-              type: "tool_result" as const,
-              tool_use_id: block.id,
-              content: executerOutil(block.name, block.input as Record<string, unknown>),
-            }));
+          if (choice.finish_reason === "tool_calls" && choice.message.tool_calls) {
+            const toolCalls = choice.message.tool_calls;
 
-            // Ajouter la réponse de l'assistant et les résultats des outils
             currentMessages = [
               ...currentMessages,
-              { role: "assistant", content: response.content },
-              { role: "user", content: toolResults },
+              { role: "assistant", content: choice.message.content ?? "", tool_calls: toolCalls },
             ];
-          } else {
-            // Réponse finale — streamer le texte
-            const textBlock = response.content.find(b => b.type === "text");
-            const text = textBlock && textBlock.type === "text" ? textBlock.text : "";
 
+            for (const toolCall of toolCalls) {
+              let input: Record<string, unknown> = {};
+              try { input = JSON.parse(toolCall.function.arguments); } catch { /* ignore */ }
+
+              const result = executerOutil(toolCall.function.name, input);
+              currentMessages.push({
+                role: "tool",
+                tool_call_id: toolCall.id,
+                content: result,
+              });
+            }
+          } else {
+            const text = choice.message.content ?? "";
             controller.enqueue(encoder.encode(JSON.stringify({ content: text })));
             break;
           }
         }
       } catch (err) {
         const message = err instanceof Error ? err.message : "Erreur inconnue";
-        controller.enqueue(
-          encoder.encode(JSON.stringify({ error: message }))
-        );
+        controller.enqueue(encoder.encode(JSON.stringify({ error: message })));
       } finally {
         controller.close();
       }
