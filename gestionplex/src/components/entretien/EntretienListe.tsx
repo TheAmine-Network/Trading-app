@@ -7,6 +7,7 @@ import Link from "next/link";
 import { useAppData } from "@/lib/DataContext";
 import { formatDate } from "@/lib/formatters";
 import { Badge } from "@/components/ui/badge";
+import { InlineStatut } from "@/components/ui/InlineStatut";
 import { StaggerChildren, StaggerItem } from "@/components/animations/StaggerChildren";
 import {
   PRIORITE_LABELS,
@@ -15,14 +16,31 @@ import {
   CATEGORIE_ENTRETIEN_LABELS,
 } from "@/lib/constants";
 
+const STATUT_OPTIONS = [
+  { value: "NOUVELLE",          label: "Nouvelle",           bg: "var(--fg-muted)" },
+  { value: "EN_COURS",          label: "En cours",           bg: "var(--info)" },
+  { value: "EN_ATTENTE_PIECE",  label: "En attente pièce",   bg: "var(--warning)" },
+  { value: "TERMINEE",          label: "Terminée",           bg: "var(--success)" },
+  { value: "ANNULEE",           label: "Annulée",            bg: "var(--danger)" },
+];
+
 type Statut = "ouvertes" | "terminees";
 type Priorite = "TOUTES" | "URGENTE" | "HAUTE" | "NORMALE" | "BASSE";
 
 export function EntretienListe() {
-  const { demandesEntretien, logements, immeubles } = useAppData();
+  const { demandesEntretien, logements, immeubles, refresh } = useAppData();
   const [onglet, setOnglet] = useState<Statut>("ouvertes");
   const [prioriteFiltree, setPrioriteFiltree] = useState<Priorite>("TOUTES");
   const [formulaireOuvert, setFormulaireOuvert] = useState(false);
+
+  async function changerStatut(id: string, statut: string) {
+    await fetch(`/api/entretien/${id}`, {
+      method: "PATCH",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ statut }),
+    });
+    refresh();
+  }
   const [titreNouveau, setTitreNouveau] = useState("");
   const [descNouveau, setDescNouveau] = useState("");
 
@@ -128,62 +146,64 @@ export function EntretienListe() {
 
               return (
                 <StaggerItem key={demande.id}>
-                  <Link href={`/entretien/${demande.id}`}>
-                    <motion.div
-                      whileHover={{ x: 2 }}
-                      whileTap={{ scale: 0.98 }}
-                      className="rounded-2xl border border-gray-200/80 bg-white p-4 shadow-sm dark:border-gray-800 dark:bg-gray-900"
-                    >
-                      <div className="flex items-start gap-3">
-                        <div
-                          className={`mt-0.5 flex h-9 w-9 flex-shrink-0 items-center justify-center rounded-xl ${
-                            demande.priorite === "URGENTE"
-                              ? "bg-red-100 dark:bg-red-900/30"
-                              : demande.priorite === "HAUTE"
-                              ? "bg-amber-100 dark:bg-amber-900/30"
-                              : "bg-gray-100 dark:bg-gray-800"
-                          }`}
-                        >
-                          {demande.priorite === "URGENTE" ? (
-                            <AlertTriangle className="h-4 w-4 text-red-600" />
-                          ) : (
-                            <Wrench className="h-4 w-4 text-gray-500" />
-                          )}
-                        </div>
+                  <motion.div
+                    whileHover={{ y: -1 }}
+                    className="card p-4"
+                  >
+                    <div className="flex items-start gap-3">
+                      <div className="mt-0.5 flex h-9 w-9 flex-shrink-0 items-center justify-center rounded-xl"
+                        style={{
+                          background: demande.priorite === "URGENTE" ? "var(--danger-muted)"
+                            : demande.priorite === "HAUTE" ? "var(--warning-muted)"
+                            : "var(--bg-tertiary)"
+                        }}>
+                        {demande.priorite === "URGENTE"
+                          ? <AlertTriangle className="h-4 w-4" style={{ color: "var(--danger)" }} />
+                          : <Wrench className="h-4 w-4" style={{ color: "var(--fg-muted)" }} />
+                        }
+                      </div>
 
-                        <div className="min-w-0 flex-1">
-                          <p className="font-semibold text-gray-900 dark:text-gray-100 truncate">
+                      <div className="min-w-0 flex-1">
+                        <Link href={`/entretien/${demande.id}`}>
+                          <p className="font-semibold truncate hover:underline" style={{ color: "var(--fg)" }}>
                             {demande.titre}
                           </p>
-                          {logement && immeuble && (
-                            <p className="mt-0.5 text-xs text-gray-500">
-                              {immeuble.nom} · {logement.numero}
-                            </p>
-                          )}
-                          <div className="mt-2 flex flex-wrap items-center gap-1.5">
-                            <Badge
-                              variante={prioriteColor}
-                              pulse={demande.priorite === "URGENTE"}
-                            >
-                              {PRIORITE_LABELS[demande.priorite]}
-                            </Badge>
-                            <Badge variante={demande.statut === "TERMINEE" ? "success" : demande.statut === "NOUVELLE" ? "muted" : "warning"}>
-                              {STATUT_ENTRETIEN_LABELS[demande.statut]}
-                            </Badge>
-                            {demande.fournisseurAssigne && (
-                              <span className="text-xs text-gray-400">{demande.fournisseurAssigne}</span>
+                        </Link>
+                        {logement && immeuble && (
+                          <p className="mt-0.5 text-xs" style={{ color: "var(--fg-muted)" }}>
+                            {immeuble.nom} · {logement.numero}
+                          </p>
+                        )}
+                        <div className="mt-2 flex flex-wrap items-center gap-1.5">
+                          <Badge variante={prioriteColor} pulse={demande.priorite === "URGENTE"}>
+                            {PRIORITE_LABELS[demande.priorite]}
+                          </Badge>
+                          {/* Statut cliquable inline */}
+                          <InlineStatut
+                            value={demande.statut}
+                            options={STATUT_OPTIONS}
+                            onSave={val => changerStatut(demande.id, val)}
+                            renderBadge={v => (
+                              <Badge variante={v === "TERMINEE" ? "success" : v === "NOUVELLE" ? "muted" : v === "ANNULEE" ? "danger" : "warning"}>
+                                {STATUT_ENTRETIEN_LABELS[v] ?? v}
+                              </Badge>
                             )}
-                          </div>
-                          <div className="mt-1.5 flex items-center gap-1 text-xs text-gray-400">
-                            <Clock className="h-3 w-3" />
-                            {formatDate(demande.dateOuverture)}
-                          </div>
+                          />
+                          {demande.fournisseurAssigne && (
+                            <span className="text-xs" style={{ color: "var(--fg-subtle)" }}>{demande.fournisseurAssigne}</span>
+                          )}
                         </div>
-
-                        <ChevronRight className="mt-1 h-4 w-4 flex-shrink-0 text-gray-400" />
+                        <div className="mt-1.5 flex items-center gap-1 text-xs" style={{ color: "var(--fg-subtle)" }}>
+                          <Clock className="h-3 w-3" />
+                          {formatDate(demande.dateOuverture)}
+                        </div>
                       </div>
-                    </motion.div>
-                  </Link>
+
+                      <Link href={`/entretien/${demande.id}`}>
+                        <ChevronRight className="mt-1 h-4 w-4 flex-shrink-0" style={{ color: "var(--fg-subtle)" }} />
+                      </Link>
+                    </div>
+                  </motion.div>
                 </StaggerItem>
               );
             })}
