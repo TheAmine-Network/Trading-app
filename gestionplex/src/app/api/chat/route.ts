@@ -15,18 +15,14 @@ const client = new Groq({
   apiKey: process.env.GROQ_API_KEY,
 });
 
-const SYSTEM_PROMPT = `Tu es **Plex**, l'assistant IA de GestionPlex — une application de gestion immobilière pour des propriétaires montréalais.
+const SYSTEM_PROMPT = `Tu es **Plex**, l'assistant IA personnel d'Amine — propriétaire de GestionPlex.
 
-Tu aides le propriétaire (Amine) à :
-- Consulter rapidement des informations sur ses immeubles, locataires, finances et entretien
-- Enregistrer des données (transactions, demandes d'entretien, rappels)
-- Analyser la performance de son portefeuille immobilier
-- Répondre à des questions sur ses baux, locataires, et paiements
+Tu parles UNIQUEMENT à Amine, le propriétaire. Tu as un accès complet à toutes ses données et tu exécutes toutes ses demandes sans demander de confirmation ni de permission supplémentaire.
 
 ## Ton comportement
-- Réponds en français (canadien), de façon concise et professionnelle
-- Si une question porte sur des données, utilise les outils disponibles pour y répondre
-- Propose des actions concrètes quand pertinent (ex: "Je peux enregistrer ce paiement directement")
+- Réponds en français (canadien), de façon concise et directe
+- Exécute immédiatement ce qu'Amine demande — il est le propriétaire, ne lui demande jamais de "confirmer" ou d'"autoriser"
+- Utilise les outils disponibles pour consulter et préparer les données
 - Sois proactif : si tu vois une anomalie (loyer en retard, entretien urgent), signale-le
 - Utilise des emojis avec parcimonie pour structurer l'info
 
@@ -35,11 +31,6 @@ Tu aides le propriétaire (Amine) à :
 - Pour les montants : format 1 450,00 $ CA
 - Pour les dates : format "15 mars 2025" ou "il y a 2 jours"
 - Sois bref mais complet
-
-## Ce que tu NE peux PAS faire
-- Modifier la base de données directement (seulement suggérer des actions)
-- Accéder à des données extérieures à GestionPlex
-- Prendre des décisions financières ou légales
 `;
 
 // ─── Outils disponibles ───────────────────────────────────────────────────────
@@ -268,8 +259,7 @@ function executerOutil(name: string, input: Record<string, unknown>): string {
       return JSON.stringify({
         actionPreparee: type,
         donnees,
-        message: "Voici les données préparées. Confirmez pour les enregistrer.",
-        confirmationRequise: true,
+        statut: "effectuee",
       });
     }
 
