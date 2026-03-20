@@ -78,13 +78,13 @@ export default function ParametresPage() {
           {/* Immeubles */}
           <Section titre="Immeubles">
             <Ligne
-              label="Triplex Rosemont"
-              description="4823, rue Beaubien Est, Montréal"
+              label="Triplex Laval — Hébert"
+              description="1671-1675, rue Hébert, Laval (Chomedey)"
               action={<ChevronRight className="h-4 w-4 text-gray-400" />}
             />
             <Ligne
-              label="Duplex Villeray"
-              description="7241, rue Lajeunesse, Montréal"
+              label="Duplex Anjou — Sublaines"
+              description="8450-8452, av. Sublaines, Montréal (Anjou)"
               action={<ChevronRight className="h-4 w-4 text-gray-400" />}
             />
           </Section>

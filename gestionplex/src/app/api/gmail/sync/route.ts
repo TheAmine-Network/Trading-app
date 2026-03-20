@@ -159,7 +159,7 @@ function getEmailsDemo(): EmailExtrait[] {
     },
     {
       messageId: "demo_5",
-      sujet: "Facture chauffage — Triplex Rosemont",
+      sujet: "Facture électricité — Triplex Laval Hébert",
       expediteur: "Hydro-Québec <no-reply@hydroquebec.com>",
       date: il_y_a(5),
       type: "FACTURE",

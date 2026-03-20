@@ -205,10 +205,10 @@ export function NouvelImmeubleForm() {
     // Données simulées extraites de Centris
     setForm(prev => ({
       ...prev,
-      nom: "Triplex Rosemont (Centris)",
-      adresse: "4823, rue Beaubien Est",
-      ville: "Montréal",
-      codePostal: "H1X 1H7",
+      nom: "Triplex Laval — Hébert (Centris)",
+      adresse: "1671-1675, rue Hébert",
+      ville: "Laval (Chomedey)",
+      codePostal: "H7V 3L6",
       type: "TRIPLEX",
       anneeConstruct: 1952,
       superficieTotale: 2400,
@@ -346,7 +346,7 @@ export function NouvelImmeubleForm() {
 
                 <InputField
                   label="Nom de l'immeuble"
-                  placeholder="Ex: Triplex Rosemont"
+                  placeholder="Ex: Triplex Laval — Hébert"
                   value={form.nom}
                   onChange={v => update("nom", v)}
                 />
