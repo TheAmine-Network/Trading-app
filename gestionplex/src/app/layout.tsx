@@ -1,5 +1,6 @@
 import type { Metadata, Viewport } from "next";
 import "./globals.css";
+import { ChatBot } from "@/components/chatbot/ChatBot";
 
 export const metadata: Metadata = {
   title: "GestionPlex — Gestion immobilière",
@@ -7,7 +8,7 @@ export const metadata: Metadata = {
   manifest: "/manifest.json",
   appleWebApp: {
     capable: true,
-    statusBarStyle: "default",
+    statusBarStyle: "black-translucent",
     title: "GestionPlex",
   },
   formatDetection: {
@@ -22,7 +23,7 @@ export const metadata: Metadata = {
 
 export const viewport: Viewport = {
   themeColor: [
-    { media: "(prefers-color-scheme: light)", color: "#ffffff" },
+    { media: "(prefers-color-scheme: light)", color: "#f2f2f7" },
     { media: "(prefers-color-scheme: dark)", color: "#000000" },
   ],
   width: "device-width",
@@ -41,11 +42,13 @@ export default function RootLayout({
     <html lang="fr-CA" suppressHydrationWarning>
       <head>
         <meta name="apple-mobile-web-app-capable" content="yes" />
-        <meta name="apple-mobile-web-app-status-bar-style" content="default" />
+        <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
         <link rel="apple-touch-icon" href="/icons/icon-192x192.png" />
+        <link rel="preconnect" href="https://fonts.googleapis.com" />
       </head>
       <body className="font-sans antialiased">
         {children}
+        <ChatBot />
       </body>
     </html>
   );
