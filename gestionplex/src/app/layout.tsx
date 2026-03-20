@@ -2,6 +2,7 @@ import type { Metadata, Viewport } from "next";
 import "./globals.css";
 import { ChatBot } from "@/components/chatbot/ChatBot";
 import { DataProvider } from "@/lib/DataContext";
+import { Sidebar } from "@/components/layout/Sidebar";
 
 export const metadata: Metadata = {
   title: "GestionPlex — Gestion immobilière",
@@ -12,9 +13,7 @@ export const metadata: Metadata = {
     statusBarStyle: "black-translucent",
     title: "GestionPlex",
   },
-  formatDetection: {
-    telephone: false,
-  },
+  formatDetection: { telephone: false },
   openGraph: {
     title: "GestionPlex",
     description: "Gérez vos immeubles locatifs facilement",
@@ -34,11 +33,7 @@ export const viewport: Viewport = {
   viewportFit: "cover",
 };
 
-export default function RootLayout({
-  children,
-}: Readonly<{
-  children: React.ReactNode;
-}>) {
+export default function RootLayout({ children }: Readonly<{ children: React.ReactNode }>) {
   return (
     <html lang="fr-CA" suppressHydrationWarning>
       <head>
@@ -46,12 +41,21 @@ export default function RootLayout({
         <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
         <link rel="apple-touch-icon" href="/icons/icon-192x192.png" />
         <link rel="preconnect" href="https://fonts.googleapis.com" />
+        <link
+          href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap"
+          rel="stylesheet"
+        />
       </head>
-      <body className="font-sans antialiased bg-gray-100 dark:bg-gray-900">
+      <body className="font-sans antialiased" style={{ background: "var(--bg)" }}>
         <DataProvider>
-          <div className="relative mx-auto min-h-screen max-w-md bg-white shadow-2xl dark:bg-black">
+          {/* Desktop sidebar */}
+          <Sidebar />
+
+          {/* Main content — décalé de 240px sur desktop */}
+          <div className="md:pl-[240px] min-h-screen">
             {children}
           </div>
+
           <ChatBot />
         </DataProvider>
       </body>

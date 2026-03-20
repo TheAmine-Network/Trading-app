@@ -31,8 +31,12 @@ export async function GET() {
   // Fusionner les transactions
   const transactions = [...baseTransactions, ...store.transactions];
 
-  // Fusionner les demandes d'entretien
-  const demandesEntretien = [...baseDemandes, ...store.demandesEntretien];
+  // Fusionner les demandes d'entretien + appliquer les overrides de statut
+  const overrides = store.demandesOverrides ?? {};
+  const demandesEntretien = [...baseDemandes, ...store.demandesEntretien].map(d => ({
+    ...d,
+    ...(overrides[d.id] ?? {}),
+  }));
 
   // Fusionner les rappels
   const rappels = [...baseRappels, ...store.rappels];

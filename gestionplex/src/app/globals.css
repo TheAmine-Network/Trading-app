@@ -121,7 +121,7 @@ html {
 body {
   background: var(--bg);
   color: var(--fg);
-  font-family: -apple-system, BlinkMacSystemFont, 'SF Pro Display', 'SF Pro Text', 'Inter', 'Segoe UI', system-ui, sans-serif;
+  font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'SF Pro Display', 'SF Pro Text', 'Segoe UI', system-ui, sans-serif;
   overscroll-behavior: none;
   line-height: 1.5;
   overflow-x: hidden;
@@ -196,6 +196,11 @@ body {
   border: 1px solid var(--border);
   border-radius: var(--radius-lg);
   box-shadow: var(--shadow-sm);
+  transition: box-shadow var(--duration-normal) var(--ease-out), transform var(--duration-normal) var(--ease-out);
+}
+
+.card:hover {
+  box-shadow: var(--shadow-md);
 }
 
 .card-elevated {
@@ -203,6 +208,20 @@ body {
   border: 1px solid var(--border);
   border-radius: var(--radius-lg);
   box-shadow: var(--shadow-md);
+}
+
+/* ─── Desktop page wrapper ──────────────────────────────────────────────────── */
+
+@media (min-width: 768px) {
+  .page-content {
+    max-width: 860px;
+    margin: 0 auto;
+    padding: 0 32px;
+  }
+  .page-hero {
+    padding-left: 32px;
+    padding-right: 32px;
+  }
 }
 
 /* ─── Gradient text ─────────────────────────────────────────────────────────── */

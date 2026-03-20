@@ -10,6 +10,7 @@ const STORE_PATH = path.join(process.cwd(), "gestionplex-store.json");
 export interface StoreData {
   logements: Record<string, Partial<{ loyerMensuel: number; statut: string; notes: string }>>;
   locataires: Record<string, Partial<{ email: string; telephone: string; notes: string }>>;
+  demandesOverrides: Record<string, Partial<{ statut: string; notes: string; cout: number; fournisseurAssigne: string; dateFermeture: string }>>;
   transactions: Array<{
     id: string;
     immeubleId: string;
@@ -46,6 +47,7 @@ export interface StoreData {
 const DEFAULT_STORE: StoreData = {
   logements: {},
   locataires: {},
+  demandesOverrides: {},
   transactions: [],
   demandesEntretien: [],
   rappels: [],
@@ -93,5 +95,12 @@ export function addDemandeEntretien(d: StoreData["demandesEntretien"][0]) {
 export function addRappel(r: StoreData["rappels"][0]) {
   const store = readStore();
   store.rappels.push(r);
+  writeStore(store);
+}
+
+export function updateDemandeEntretien(id: string, overrides: Partial<{ statut: string; notes: string; cout: number; fournisseurAssigne: string; dateFermeture: string }>) {
+  const store = readStore();
+  if (!store.demandesOverrides) store.demandesOverrides = {};
+  store.demandesOverrides[id] = { ...store.demandesOverrides[id], ...overrides };
   writeStore(store);
 }
