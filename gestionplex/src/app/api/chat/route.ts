@@ -2,14 +2,32 @@ import Groq from "groq-sdk";
 import { NextRequest } from "next/server";
 import {
   immeubles,
-  logements,
+  logements as baseLogements,
   locataires,
-  transactions,
-  demandesEntretien,
-  rappels,
+  transactions as baseTx,
+  demandesEntretien as baseDemandes,
+  rappels as baseRappels,
   getStatsFinancieresMois,
   getTauxOccupation,
 } from "@/lib/mock-data";
+import {
+  readStore,
+  updateLogement,
+  updateLocataire,
+  addTransaction,
+  addDemandeEntretien,
+  addRappel,
+} from "@/lib/store";
+
+// Données fusionnées (base + overrides persistants)
+function getMergedData() {
+  const store = readStore();
+  const logements = baseLogements.map(l => ({ ...l, ...(store.logements[l.id] ?? {}) }));
+  const transactions = [...baseTx, ...store.transactions];
+  const demandesEntretien = [...baseDemandes, ...store.demandesEntretien];
+  const rappels = [...baseRappels, ...store.rappels];
+  return { logements, transactions, demandesEntretien, rappels };
+}
 
 const client = new Groq({
   apiKey: process.env.GROQ_API_KEY,
@@ -103,22 +121,93 @@ const tools: Groq.Chat.ChatCompletionTool[] = [
   {
     type: "function",
     function: {
-      name: "prepare_action",
-      description: "Préparer une action à effectuer (transaction, entretien, rappel) — retourne les données formatées pour l'utilisateur",
+      name: "update_logement",
+      description: "Modifier un logement (loyer, statut, notes). Utilise l'ID du logement.",
       parameters: {
         type: "object",
         properties: {
-          type: {
-            type: "string",
-            enum: ["NOUVELLE_TRANSACTION", "NOUVELLE_ENTRETIEN", "NOUVEAU_RAPPEL"],
-            description: "Type d'action",
-          },
-          donnees: {
-            type: "object",
-            description: "Données de l'action (montant, locataire, description, etc.)",
-          },
+          logementId: { type: "string", description: "ID du logement (ex: log_lav_1671)" },
+          loyerMensuel: { type: "number", description: "Nouveau loyer mensuel en dollars" },
+          statut: { type: "string", enum: ["OCCUPE", "VACANT", "EN_RENOVATION"], description: "Nouveau statut" },
+          notes: { type: "string", description: "Notes à mettre à jour" },
         },
-        required: ["type", "donnees"],
+        required: ["logementId"],
+      },
+    },
+  },
+  {
+    type: "function",
+    function: {
+      name: "update_locataire",
+      description: "Modifier les infos d'un locataire (email, téléphone, notes)",
+      parameters: {
+        type: "object",
+        properties: {
+          locataireId: { type: "string", description: "ID du locataire" },
+          email: { type: "string" },
+          telephone: { type: "string" },
+          notes: { type: "string" },
+        },
+        required: ["locataireId"],
+      },
+    },
+  },
+  {
+    type: "function",
+    function: {
+      name: "add_transaction",
+      description: "Enregistrer une nouvelle transaction (loyer reçu, dépense, réparation, etc.)",
+      parameters: {
+        type: "object",
+        properties: {
+          immeubleId: { type: "string", description: "ID de l'immeuble" },
+          logementId: { type: "string", description: "ID du logement (optionnel)" },
+          type: { type: "string", enum: ["REVENU", "DEPENSE"], description: "Type de transaction" },
+          categorie: { type: "string", enum: ["LOYER", "REPARATION", "HYPOTHEQUE", "ASSURANCE", "TAXES_MUNICIPALES", "TAXES_SCOLAIRES", "RENOVATION", "DENEIGEMENT", "AUTRE"], description: "Catégorie" },
+          montant: { type: "number", description: "Montant en dollars" },
+          description: { type: "string", description: "Description de la transaction" },
+          date: { type: "string", description: "Date ISO (défaut: aujourd'hui)" },
+          fournisseur: { type: "string" },
+          methodePaiement: { type: "string", enum: ["VIREMENT", "CHEQUE", "PRELEVEMENT", "COMPTANT"] },
+          notes: { type: "string" },
+        },
+        required: ["immeubleId", "type", "categorie", "montant", "description"],
+      },
+    },
+  },
+  {
+    type: "function",
+    function: {
+      name: "add_maintenance",
+      description: "Créer une nouvelle demande d'entretien",
+      parameters: {
+        type: "object",
+        properties: {
+          logementId: { type: "string", description: "ID du logement" },
+          titre: { type: "string" },
+          description: { type: "string" },
+          priorite: { type: "string", enum: ["URGENTE", "HAUTE", "NORMALE", "BASSE"] },
+          categorie: { type: "string", enum: ["PLOMBERIE", "ELECTRICITE", "CHAUFFAGE", "STRUCTURE", "AUTRE"] },
+          notes: { type: "string" },
+        },
+        required: ["logementId", "titre", "description", "priorite", "categorie"],
+      },
+    },
+  },
+  {
+    type: "function",
+    function: {
+      name: "add_rappel",
+      description: "Créer un nouveau rappel",
+      parameters: {
+        type: "object",
+        properties: {
+          titre: { type: "string" },
+          description: { type: "string" },
+          date: { type: "string", description: "Date ISO du rappel" },
+          immeubleId: { type: "string", description: "ID de l'immeuble (optionnel)" },
+        },
+        required: ["titre", "description", "date"],
       },
     },
   },
@@ -127,16 +216,17 @@ const tools: Groq.Chat.ChatCompletionTool[] = [
 // ─── Exécution des outils ─────────────────────────────────────────────────────
 
 function executerOutil(name: string, input: Record<string, unknown>): string {
+  const { logements, transactions, demandesEntretien, rappels } = getMergedData();
+
   switch (name) {
     case "get_stats_overview": {
       const now = new Date();
       const stats = getStatsFinancieresMois(now.getFullYear(), now.getMonth());
-      const { nbOccupes, nbTotal, taux } = getTauxOccupation();
+      const occup = getTauxOccupation();
       const ouvertes = demandesEntretien.filter(d => !["TERMINEE", "ANNULEE"].includes(d.statut));
       const urgentes = ouvertes.filter(d => d.priorite === "URGENTE");
-
       return JSON.stringify({
-        occupation: { nbOccupes, nbTotal, taux: `${taux}%` },
+        occupation: { nbOccupes: occup.nbOccupes, nbTotal: occup.nbTotal, taux: `${occup.taux}%` },
         finances: {
           revenus: stats.revenus,
           depenses: stats.depenses,
@@ -221,7 +311,7 @@ function executerOutil(name: string, input: Record<string, unknown>): string {
           description: d.description,
           immeuble: imm?.nom,
           logement: log?.numero,
-          date: new Date(d.createdAt).toLocaleDateString("fr-CA"),
+          date: new Date().toLocaleDateString("fr-CA"),
         };
       }));
     }
@@ -254,13 +344,48 @@ function executerOutil(name: string, input: Record<string, unknown>): string {
       }));
     }
 
-    case "prepare_action": {
-      const { type, donnees } = input as { type: string; donnees: Record<string, unknown> };
-      return JSON.stringify({
-        actionPreparee: type,
-        donnees,
-        statut: "effectuee",
-      });
+    case "update_logement": {
+      const { logementId, ...overrides } = input as { logementId: string; loyerMensuel?: number; statut?: string; notes?: string };
+      updateLogement(logementId, overrides);
+      const log = logements.find(l => l.id === logementId);
+      return JSON.stringify({ success: true, logement: logementId, numero: log?.numero, mises_a_jour: overrides });
+    }
+
+    case "update_locataire": {
+      const { locataireId, ...overrides } = input as { locataireId: string; email?: string; telephone?: string; notes?: string };
+      updateLocataire(locataireId, overrides);
+      const loc = locataires.find(l => l.id === locataireId);
+      return JSON.stringify({ success: true, locataire: `${loc?.prenom} ${loc?.nom}`, mises_a_jour: overrides });
+    }
+
+    case "add_transaction": {
+      const tx = {
+        id: `tx_${Date.now()}`,
+        ...(input as object),
+        date: (input.date as string) ?? new Date().toISOString(),
+      } as Parameters<typeof addTransaction>[0];
+      addTransaction(tx);
+      return JSON.stringify({ success: true, transaction: tx.description, montant: tx.montant });
+    }
+
+    case "add_maintenance": {
+      const d = {
+        id: `dem_${Date.now()}`,
+        statut: "NOUVELLE",
+        ...(input as object),
+      } as Parameters<typeof addDemandeEntretien>[0];
+      addDemandeEntretien(d);
+      return JSON.stringify({ success: true, demande: d.titre, priorite: d.priorite });
+    }
+
+    case "add_rappel": {
+      const r = {
+        id: `rap_${Date.now()}`,
+        statut: "ACTIF",
+        ...(input as object),
+      } as Parameters<typeof addRappel>[0];
+      addRappel(r);
+      return JSON.stringify({ success: true, rappel: r.titre, date: r.date });
     }
 
     default:

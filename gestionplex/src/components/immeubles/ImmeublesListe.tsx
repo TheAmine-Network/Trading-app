@@ -4,12 +4,13 @@ import { motion } from "framer-motion";
 import { Building2, ChevronRight, MapPin, Home } from "lucide-react";
 import Link from "next/link";
 import Image from "next/image";
-import { immeubles, logements } from "@/lib/mock-data";
+import { useData } from "@/lib/useData";
 import { formatCAD } from "@/lib/formatters";
 import { Badge } from "@/components/ui/badge";
 import { StaggerChildren, StaggerItem } from "@/components/animations/StaggerChildren";
 
 export function ImmeublesListe() {
+  const { immeubles, logements } = useData();
   return (
     <div className="min-h-screen bg-gray-50 dark:bg-black">
       {/* En-tête */}
