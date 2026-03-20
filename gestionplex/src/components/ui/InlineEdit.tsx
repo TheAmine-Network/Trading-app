@@ -53,7 +53,7 @@ export function InlineEdit({
 
   if (editing) {
     return (
-      <div className="flex items-center gap-1">
+      <div className="flex items-center gap-1" onClick={e => e.stopPropagation()}>
         {prefix && <span className="text-xs" style={{ color: "var(--fg-muted)" }}>{prefix}</span>}
         <input
           ref={inputRef}
@@ -90,7 +90,7 @@ export function InlineEdit({
 
   return (
     <button
-      onClick={() => setEditing(true)}
+      onClick={e => { e.stopPropagation(); e.preventDefault(); setEditing(true); }}
       className={`group inline-flex items-center gap-1 transition-all ${className}`}
       title="Cliquer pour modifier"
     >
