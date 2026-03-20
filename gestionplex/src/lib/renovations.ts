@@ -19,6 +19,8 @@ export type CategorieTravail =
   | "CUISINE"
   | "ELECTRICITE"
   | "CHAUFFAGE"
+  | "PLOMBERIE"
+  | "STRUCTURE"
   | "EXTERIEUR"
   | "AUTRE";
 
@@ -326,6 +328,243 @@ export const travauxAnjou: TravailRenovation[] = [
     notes:
       "Réservoir hors-sol: ~$800-1500. Enterré: ~$2000-3500 + analyse sol possible. " +
       "Doit être réalisé par un entrepreneur certifié selon règlements MDDELCC.",
+  },
+];
+
+// ─── Travaux du Triplex Laval (BatiXpert 26 sept. 2023) ──────────────────────
+
+export const travauxLaval: TravailRenovation[] = [
+
+  // ══ 🔴 DÉFAUTS À CORRIGER IMMÉDIATEMENT ══════════════════════════════════
+
+  {
+    id: "lav_elec_panneau_1671a",
+    immeubleId: "imm_triplex_laval",
+    logementId: "log_lav_1671a",
+    titre: "Panneau électrique 1671A — obturer les ouvertures (URGENT)",
+    description:
+      "Panneau 200A — ouvertures non obturées. Danger immédiat : risque d'arc électrique, d'incendie ou de choc. " +
+      "Maître électricien certifié (CMEQ) requis. Obtenir permis Régie du bâtiment.",
+    categorie: "ELECTRICITE",
+    statut: "PLANIFIE",
+    priorite: 1,
+    coutMin: 200,
+    coutMax: 600,
+    notes: "À corriger AVANT toute visite de locataire potentiel ou travaux dans l'unité.",
+  },
+  {
+    id: "lav_elec_prises_1675",
+    immeubleId: "imm_triplex_laval",
+    logementId: "log_lav_1675",
+    titre: "Prises élec. cuisine 1675 — non fonctionnelles",
+    description:
+      "Prises de la cuisine au 1675 non fonctionnelles. Cause à identifier par maître électricien : " +
+      "disjoncteur défectueux, circuit ouvert ou câblage défaillant.",
+    categorie: "ELECTRICITE",
+    statut: "PLANIFIE",
+    priorite: 1,
+    coutMin: 300,
+    coutMax: 900,
+    notes: "Jumeler avec la visite pour le panneau 1671A pour minimiser les frais de déplacement.",
+  },
+  {
+    id: "lav_plomb_valve_eau",
+    immeubleId: "imm_triplex_laval",
+    logementId: null,
+    titre: "Valve d'eau principale — remplacement (corrosion)",
+    description:
+      "Valve principale avec rouille et corrosion importante. Ne doit PAS être opérée. " +
+      "Remplacement par plombier certifié AVANT toute urgence plomberie. " +
+      "Risque de bris lors d'une urgence si non remplacée.",
+    categorie: "PLOMBERIE",
+    statut: "PLANIFIE",
+    priorite: 1,
+    coutMin: 300,
+    coutMax: 900,
+  },
+  {
+    id: "lav_plomb_clapet",
+    immeubleId: "imm_triplex_laval",
+    logementId: null,
+    titre: "Clapet anti-refoulement — installation",
+    description:
+      "Clapet anti-refoulement absent ou non visible. Certains assureurs l'exigent pour couvrir " +
+      "les dégâts d'égout. Vérifier avec votre assureur avant travaux.",
+    categorie: "PLOMBERIE",
+    statut: "PLANIFIE",
+    priorite: 1,
+    coutMin: 400,
+    coutMax: 1200,
+    notes: "Contacter l'assureur pour confirmer l'exigence et les specs techniques.",
+  },
+
+  // ══ 🟠 DÉFAUTS IMPORTANTS ═════════════════════════════════════════════════
+
+  {
+    id: "lav_struct_rejointoiement",
+    immeubleId: "imm_triplex_laval",
+    logementId: null,
+    titre: "Rejointoiement brique — façade avant droite + côté gauche",
+    description:
+      "Joints de mortier friables et fissurés sous la fenêtre avant droite et côté gauche. " +
+      "Risque d'infiltration d'eau → dommages structurels à long terme. " +
+      "Maçon requis pour évaluation et rejointoiement.",
+    categorie: "EXTERIEUR",
+    statut: "PLANIFIE",
+    priorite: 2,
+    coutMin: 2500,
+    coutMax: 8000,
+    notes: "Inspecter l'ensemble de la façade lors de la visite du maçon. Peut être élargi.",
+  },
+  {
+    id: "lav_struct_mur_soutenement",
+    immeubleId: "imm_triplex_laval",
+    logementId: null,
+    titre: "Mur de soutènement — légèrement incliné (devis avant signature)",
+    description:
+      "Mur de soutènement légèrement incliné. Rapport BatiXpert recommande d'obtenir un devis " +
+      "spécialisé avant signature. Ingénieur en structure ou expert fondation requis.",
+    categorie: "STRUCTURE",
+    statut: "DEVIS_RECU",
+    priorite: 2,
+    coutMin: 1500,
+    coutMax: 8000,
+    notes: "Peut varier énormément selon gravité réelle. Expert fondation = ~$500-800 pour rapport.",
+  },
+  {
+    id: "lav_struct_fenetre_1671a",
+    immeubleId: "imm_triplex_laval",
+    logementId: "log_lav_1671a",
+    titre: "Fenêtre 1671A — infiltration eau + moisissures/pourriture cadrage",
+    description:
+      "Infiltration d'eau à la fenêtre avant de l'unité 1671A. " +
+      "Moisissures et pourriture observées sur le cadrage. " +
+      "Expert requis : étendue des dommages potentiellement structurels. " +
+      "Possibilité de contamination fongique dans les murs.",
+    categorie: "STRUCTURE",
+    statut: "PLANIFIE",
+    priorite: 2,
+    coutMin: 2000,
+    coutMax: 8000,
+    notes: "Traitement moisissures inclus si confirmé. Remplacement fenêtre + calfeutrage requis.",
+  },
+  {
+    id: "lav_planchers_evaluation",
+    immeubleId: "imm_triplex_laval",
+    logementId: null,
+    titre: "Planchers (3 unités) — espacements et inclinaison, évaluation spécialiste",
+    description:
+      "Rapport BatiXpert : espacements et inclinaison dans les planchers de toutes les unités. " +
+      "Spécialiste requis pour évaluation complète. " +
+      "Peut indiquer : tassement, dommages à la structure de plancher, travaux importants.",
+    categorie: "PLANCHERS",
+    statut: "PLANIFIE",
+    priorite: 2,
+    coutMin: 1000,
+    coutMax: 25000,
+    notes:
+      "Fourchette large — dépend du diagnostic. Peut aller du simple nivellement (~$1-3k) " +
+      "à une réfection structurelle des solives (~$15-25k+).",
+  },
+  {
+    id: "lav_struct_fissures_fond",
+    immeubleId: "imm_triplex_laval",
+    logementId: null,
+    titre: "Fissures fondation — actives < 1mm, surveiller",
+    description:
+      "Fissures réparées : obtenir les factures auprès du vendeur pour documentation. " +
+      "Fissures actives < 1mm à surveiller. " +
+      "Expert en fondation recommandé pour monitoring annuel.",
+    categorie: "STRUCTURE",
+    statut: "EN_COURS",
+    priorite: 2,
+    coutMin: 500,
+    coutMax: 5000,
+    notes:
+      "Documenter avec photos datées 2× par an. Si progression > 1mm, expert fondation immédiat. " +
+      "Demander les factures des réparations antérieures au vendeur.",
+  },
+  {
+    id: "lav_exterieur_balcon",
+    immeubleId: "imm_triplex_laval",
+    logementId: null,
+    titre: "Dalle balcon arrière — fissurée (colmatage)",
+    description:
+      "Dalle du balcon arrière fissurée. Colmatage requis pour éviter infiltration d'eau " +
+      "et dégradation accélérée (gel/dégel hivernal).",
+    categorie: "EXTERIEUR",
+    statut: "PLANIFIE",
+    priorite: 2,
+    coutMin: 400,
+    coutMax: 2000,
+  },
+
+  // ══ 🟡 RECOMMANDATIONS / ENTRETIEN ══════════════════════════════════════
+
+  {
+    id: "lav_exterieur_sife",
+    immeubleId: "imm_triplex_laval",
+    logementId: null,
+    titre: "Revêtement acrylique SIFE — fissures, risque infiltration",
+    description:
+      "Fissures visibles dans le revêtement acrylique (SIFE). " +
+      "Investigation par spécialiste recommandée — risque d'infiltration derrière le parement. " +
+      "Si confirmé : réparation localisée ou remplacement partiel.",
+    categorie: "EXTERIEUR",
+    statut: "PLANIFIE",
+    priorite: 2,
+    coutMin: 2000,
+    coutMax: 10000,
+    notes:
+      "Spécialiste enveloppe du bâtiment (~$600-900 pour rapport). " +
+      "Réparer avant l'hiver pour éviter aggravation.",
+  },
+  {
+    id: "lav_elec_panneaux_pleins",
+    immeubleId: "imm_triplex_laval",
+    logementId: null,
+    titre: "Panneaux élec. 1671 et 1675 — pleins (tout ajout = nouveau panneau)",
+    description:
+      "Les panneaux 100A de 1671 et 1675 sont pleins. " +
+      "Tout ajout de circuit (sécheuse, climatiseur, etc.) nécessite l'installation d'un panneau supplémentaire. " +
+      "À planifier si rénovations ou changements d'appareils prévus.",
+    categorie: "ELECTRICITE",
+    statut: "PLANIFIE",
+    priorite: 3,
+    coutMin: 2500,
+    coutMax: 5000,
+    notes:
+      "Prioriser si sorties sécheuse ou upgrades électriques planifiés. " +
+      "Jumeler avec travaux d'électricité urgents pour réduire les frais de déplacement.",
+  },
+  {
+    id: "lav_elec_disjoncteurs_1675",
+    immeubleId: "imm_triplex_laval",
+    logementId: "log_lav_1675",
+    titre: "Disjoncteurs 1675 — étiqueter (non identifiés)",
+    description:
+      "Disjoncteurs du panneau 1675 non identifiés. Étiquetage requis pour sécurité et entretien.",
+    categorie: "ELECTRICITE",
+    statut: "PLANIFIE",
+    priorite: 3,
+    coutMin: 0,
+    coutMax: 200,
+    notes: "Peut être fait par le propriétaire avec un localisateur de disjoncteurs (~$30 chez Rona).",
+  },
+  {
+    id: "lav_cert_localisation",
+    immeubleId: "imm_triplex_laval",
+    logementId: null,
+    titre: "Certificat de localisation — mettre à jour (2009)",
+    description:
+      "Certificat de localisation datant de 2009 — à rafraîchir. " +
+      "Nécessaire pour vente, refinancement ou litiges de voisinage.",
+    categorie: "AUTRE",
+    statut: "PLANIFIE",
+    priorite: 3,
+    coutMin: 800,
+    coutMax: 1500,
+    notes: "Arpenteur-géomètre membre de l'OAQ.",
   },
 ];
 

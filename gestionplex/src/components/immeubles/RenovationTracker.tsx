@@ -21,6 +21,7 @@ import {
 } from "lucide-react";
 import {
   travauxAnjou,
+  travauxLaval,
   getBudgetTotal,
   getTravauxParCategorie,
   type TravailRenovation,
@@ -28,6 +29,12 @@ import {
   type StatutTravail,
   type Subvention,
 } from "@/lib/renovations";
+
+// Catalogue global par immeuble
+const TRAVAUX_PAR_IMMEUBLE: Record<string, TravailRenovation[]> = {
+  imm_duplex_anjou: travauxAnjou,
+  imm_triplex_laval: travauxLaval,
+};
 import { cn } from "@/lib/utils";
 
 // ─── Config visuelle par catégorie ───────────────────────────────────────────
@@ -62,6 +69,18 @@ const CAT_CONFIG: Record<CategorieTravail, { label: string; icone: React.Element
     icone: Thermometer,
     couleur: "#ff3b30",
     gradient: "linear-gradient(135deg, #ff3b30 0%, #ff6b00 100%)",
+  },
+  PLOMBERIE: {
+    label: "Plomberie",
+    icone: Hammer,
+    couleur: "#007aff",
+    gradient: "linear-gradient(135deg, #007aff 0%, #5856d6 100%)",
+  },
+  STRUCTURE: {
+    label: "Structure / Fondation",
+    icone: Hammer,
+    couleur: "#ff6b00",
+    gradient: "linear-gradient(135deg, #ff6b00 0%, #ff3b30 100%)",
   },
   EXTERIEUR: {
     label: "Extérieur",
@@ -99,7 +118,7 @@ interface RenovationTrackerProps {
 }
 
 export function RenovationTracker({ immeubleId }: RenovationTrackerProps) {
-  const travaux = travauxAnjou.filter(t => t.immeubleId === immeubleId);
+  const travaux = TRAVAUX_PAR_IMMEUBLE[immeubleId] ?? [];
   const [categorieOuverte, setCategorieOuverte] = useState<CategorieTravail | null>(null);
   const [travailOuvert, setTravailOuvert] = useState<string | null>(null);
   const [onglet, setOnglet] = useState<"travaux" | "subventions">("travaux");

@@ -11,7 +11,12 @@ import Image from "next/image";
 import {
   immeubles, logements, locataires, demandesEntretien,
 } from "@/lib/mock-data";
-import { travauxAnjou } from "@/lib/renovations";
+import { travauxAnjou, travauxLaval } from "@/lib/renovations";
+
+const TRAVAUX_MAP: Record<string, { length: number }> = {
+  imm_duplex_anjou: travauxAnjou,
+  imm_triplex_laval: travauxLaval,
+};
 import { RenovationTracker } from "./RenovationTracker";
 import { formatCAD, formatDate } from "@/lib/formatters";
 import { Badge } from "@/components/ui/badge";
@@ -71,8 +76,9 @@ export function ImmeubleDetail({ id }: ImmeubleDetailProps) {
     (d) => d.statut !== "TERMINEE" && d.statut !== "ANNULEE"
   );
 
-  const aRenovations = travauxAnjou.some(t => t.immeubleId === id);
-  const nbRenovations = travauxAnjou.filter(t => t.immeubleId === id).length;
+  const travaux = TRAVAUX_MAP[id] ?? { length: 0 };
+  const aRenovations = travaux.length > 0;
+  const nbRenovations = travaux.length;
 
   const onglets: { id: Onglet; label: string; count?: number }[] = [
     { id: "info", label: "Infos" },
@@ -247,6 +253,36 @@ export function ImmeubleDetail({ id }: ImmeubleDetailProps) {
                 </div>
               )}
             </div>
+
+            {/* Indicateurs Triplex Laval */}
+            {id === "imm_triplex_laval" && (
+              <div
+                className="rounded-2xl p-4"
+                style={{ background: "var(--gradient-brand-subtle)", border: "1px solid var(--accent-muted)" }}
+              >
+                <p className="section-title mb-3" style={{ color: "var(--accent)" }}>
+                  Indicateurs financiers — BatiXpert 2023
+                </p>
+                <div className="grid grid-cols-2 gap-3">
+                  {[
+                    { label: "Revenus bruts/an", valeur: "39 600 $", note: "3 300 $/mois" },
+                    { label: "Taxes totales 2023", valeur: "5 531 $", note: "mun. 5 043 + scol. 488" },
+                    { label: "RNO", valeur: "34 069 $/an", note: "Revenu net opérationnel" },
+                    { label: "MRB", valeur: "18,91", note: "Cible ≤ 15 = bon achat" },
+                    { label: "Prix / porte", valeur: "249 667 $", note: "749k / 3 logements" },
+                    { label: "Éval. 2025 (RE/MAX)", valeur: "849 000 $", note: "+100k depuis achat" },
+                  ].map(m => (
+                    <div key={m.label} className="rounded-xl p-3" style={{ background: "var(--bg-elevated)", border: "1px solid var(--border)" }}>
+                      <p className="section-title">{m.label}</p>
+                      <p className="mt-0.5 text-base font-bold tabular-nums" style={{ color: "var(--fg)", letterSpacing: "-0.01em" }}>
+                        {m.valeur}
+                      </p>
+                      <p className="mt-0.5 text-[10px]" style={{ color: "var(--fg-subtle)" }}>{m.note}</p>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            )}
 
             {/* Rentabilité pour Anjou */}
             {id === "imm_duplex_anjou" && (
