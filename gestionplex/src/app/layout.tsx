@@ -47,9 +47,11 @@ export default function RootLayout({
         <link rel="apple-touch-icon" href="/icons/icon-192x192.png" />
         <link rel="preconnect" href="https://fonts.googleapis.com" />
       </head>
-      <body className="font-sans antialiased">
+      <body className="font-sans antialiased bg-gray-100 dark:bg-gray-900">
         <DataProvider>
-          {children}
+          <div className="relative mx-auto min-h-screen max-w-md bg-white shadow-2xl dark:bg-black">
+            {children}
+          </div>
           <ChatBot />
         </DataProvider>
       </body>

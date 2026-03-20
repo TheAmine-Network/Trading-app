@@ -30,7 +30,7 @@ export function MobileNav() {
 
   return (
     <nav
-      className="fixed bottom-0 left-0 right-0 z-40 glass"
+      className="fixed bottom-0 left-1/2 z-40 w-full max-w-md -translate-x-1/2 glass"
       style={{ borderTop: "1px solid var(--border)" }}
     >
       <div
