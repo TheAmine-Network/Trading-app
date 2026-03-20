@@ -413,12 +413,15 @@ export async function POST(request: NextRequest) {
     );
   }
 
+  // Garder seulement les 6 derniers messages pour rester sous la limite TPM
+  const historiqueTronque = messages.slice(-6);
+
   const encoder = new TextEncoder();
   const stream = new ReadableStream({
     async start(controller) {
       try {
         let currentMessages: Groq.Chat.ChatCompletionMessageParam[] = [
-          ...messages.map(m => ({ role: m.role, content: m.content } as Groq.Chat.ChatCompletionMessageParam)),
+          ...historiqueTronque.map(m => ({ role: m.role, content: m.content } as Groq.Chat.ChatCompletionMessageParam)),
         ];
 
         // Boucle agent avec outils
@@ -448,7 +451,17 @@ export async function POST(request: NextRequest) {
               let input: Record<string, unknown> = {};
               try { input = JSON.parse(toolCall.function.arguments); } catch { /* ignore */ }
 
-              const result = executerOutil(toolCall.function.name, input);
+              let result = executerOutil(toolCall.function.name, input);
+              // Limiter la taille des résultats d'outils pour éviter de dépasser le TPM
+              if (result.length > 3000) {
+                try {
+                  const parsed = JSON.parse(result);
+                  // Tronquer les tableaux longs
+                  if (Array.isArray(parsed)) result = JSON.stringify(parsed.slice(0, 5));
+                  else if (parsed.transactions) parsed.transactions = parsed.transactions.slice(0, 5);
+                  result = JSON.stringify(parsed);
+                } catch { result = result.slice(0, 3000) + "..."; }
+              }
               currentMessages.push({
                 role: "tool",
                 tool_call_id: toolCall.id,
