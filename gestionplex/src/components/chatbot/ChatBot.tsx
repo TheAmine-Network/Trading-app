@@ -14,6 +14,7 @@ import {
   Paperclip,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
+import { useAppData } from "@/lib/DataContext";
 
 interface Message {
   id: string;
@@ -30,6 +31,7 @@ const SUGGESTIONS = [
 ];
 
 export function ChatBot() {
+  const { refresh } = useAppData();
   const [ouvert, setOuvert] = useState(false);
   const [messages, setMessages] = useState<Message[]>([
     {
@@ -99,6 +101,7 @@ export function ChatBot() {
       };
 
       setMessages((prev) => [...prev, assistantMsg]);
+      refresh(); // Rafraîchir les données après chaque réponse du bot
 
       if (!ouvert) {
         setUnread((n) => n + 1);

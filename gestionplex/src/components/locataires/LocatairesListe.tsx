@@ -4,11 +4,12 @@ import { useState } from "react";
 import { motion } from "framer-motion";
 import { Search, Phone, Mail, ChevronRight, User } from "lucide-react";
 import Link from "next/link";
-import { locataires, logements, immeubles } from "@/lib/mock-data";
+import { useAppData } from "@/lib/DataContext";
 import { Badge } from "@/components/ui/badge";
 import { StaggerChildren, StaggerItem } from "@/components/animations/StaggerChildren";
 
 export function LocatairesListe() {
+  const { locataires, logements, immeubles } = useAppData();
   const [recherche, setRecherche] = useState("");
   const [filtre, setFiltre] = useState<"tous" | "actifs" | "anciens">("actifs");
 

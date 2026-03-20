@@ -4,7 +4,7 @@ import { useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { Wrench, Plus, X, ChevronRight, AlertTriangle, Clock } from "lucide-react";
 import Link from "next/link";
-import { demandesEntretien, logements, immeubles } from "@/lib/mock-data";
+import { useAppData } from "@/lib/DataContext";
 import { formatDate } from "@/lib/formatters";
 import { Badge } from "@/components/ui/badge";
 import { StaggerChildren, StaggerItem } from "@/components/animations/StaggerChildren";
@@ -19,6 +19,7 @@ type Statut = "ouvertes" | "terminees";
 type Priorite = "TOUTES" | "URGENTE" | "HAUTE" | "NORMALE" | "BASSE";
 
 export function EntretienListe() {
+  const { demandesEntretien, logements, immeubles } = useAppData();
   const [onglet, setOnglet] = useState<Statut>("ouvertes");
   const [prioriteFiltree, setPrioriteFiltree] = useState<Priorite>("TOUTES");
   const [formulaireOuvert, setFormulaireOuvert] = useState(false);

@@ -3,12 +3,13 @@
 import { motion } from "framer-motion";
 import { ArrowLeft, Phone, Mail, MessageSquare, Calendar, Home, FileText, DollarSign, AlertCircle } from "lucide-react";
 import Link from "next/link";
-import { locataires, logements, immeubles, baux, transactions, demandesEntretien } from "@/lib/mock-data";
+import { useAppData } from "@/lib/DataContext";
 import { formatCAD, formatDate } from "@/lib/formatters";
 import { Badge } from "@/components/ui/badge";
 import { EmptyState } from "@/components/ui/empty-state";
 
 export function LocataireDetail({ id }: { id: string }) {
+  const { locataires, logements, immeubles, baux, transactions, demandesEntretien } = useAppData();
   const locataire = locataires.find((l) => l.id === id);
   if (!locataire) return (
     <div className="flex min-h-screen items-center justify-center p-5">

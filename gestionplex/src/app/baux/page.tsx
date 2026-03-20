@@ -4,7 +4,7 @@ import { motion } from "framer-motion";
 import { ArrowLeft, FileText, AlertTriangle, ChevronRight, TrendingUp } from "lucide-react";
 import Link from "next/link";
 import { MobileNav } from "@/components/layout/MobileNav";
-import { baux, locataires, logements, immeubles } from "@/lib/mock-data";
+import { useAppData } from "@/lib/DataContext";
 import { formatCAD, formatDate } from "@/lib/formatters";
 import { Badge } from "@/components/ui/badge";
 import { StaggerChildren, StaggerItem } from "@/components/animations/StaggerChildren";
@@ -28,6 +28,7 @@ function joursRestants(dateFin: Date): number {
 }
 
 export default function BauxPage() {
+  const { baux, locataires, logements, immeubles } = useAppData();
   const bauxAvecDetails = baux.map((bail) => {
     const locataire = locataires.find((l) => l.id === bail.locataireId);
     const logement = logements.find((l) => l.id === bail.logementId);

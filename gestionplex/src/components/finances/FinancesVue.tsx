@@ -12,7 +12,7 @@ import {
   ResponsiveContainer,
   Legend,
 } from "recharts";
-import { transactions, immeubles, getTauxOccupation } from "@/lib/mock-data";
+import { useAppData } from "@/lib/DataContext";
 import { formatCAD, formatDate } from "@/lib/formatters";
 import { CATEGORIES_TRANSACTION_LABELS } from "@/lib/constants";
 
@@ -64,6 +64,7 @@ function getDateDebutPeriode(periode: Periode): Date {
 }
 
 export function FinancesVue() {
+  const { transactions, immeubles, getTauxOccupation } = useAppData();
   const [periode, setPeriode] = useState<Periode>("annee");
   const [formulaireOuvert, setFormulaireOuvert] = useState(false);
 

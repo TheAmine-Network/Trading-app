@@ -1,6 +1,7 @@
 import type { Metadata, Viewport } from "next";
 import "./globals.css";
 import { ChatBot } from "@/components/chatbot/ChatBot";
+import { DataProvider } from "@/lib/DataContext";
 
 export const metadata: Metadata = {
   title: "GestionPlex — Gestion immobilière",
@@ -47,8 +48,10 @@ export default function RootLayout({
         <link rel="preconnect" href="https://fonts.googleapis.com" />
       </head>
       <body className="font-sans antialiased">
-        {children}
-        <ChatBot />
+        <DataProvider>
+          {children}
+          <ChatBot />
+        </DataProvider>
       </body>
     </html>
   );

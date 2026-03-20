@@ -5,7 +5,7 @@ import { motion } from "framer-motion";
 import { ArrowLeft, TrendingDown } from "lucide-react";
 import Link from "next/link";
 import { MobileNav } from "@/components/layout/MobileNav";
-import { transactions, immeubles } from "@/lib/mock-data";
+import { useAppData } from "@/lib/DataContext";
 import { formatCAD, formatDate } from "@/lib/formatters";
 import { CATEGORIES_TRANSACTION_LABELS } from "@/lib/constants";
 
@@ -24,6 +24,7 @@ const ICONE_CATEGORIE: Record<string, string> = {
 };
 
 export default function DepensesPage() {
+  const { transactions, immeubles } = useAppData();
   const [immeubleFiltre, setImmeubleFiltre] = useState<string>("tous");
 
   const depenses = transactions
