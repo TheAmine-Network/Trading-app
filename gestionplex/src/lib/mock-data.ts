@@ -400,18 +400,22 @@ function genererTransactions(): Transaction[] {
       createdAt: new Date("2025-09-15"),
       updatedAt: new Date("2025-09-15"),
     },
-    // Duplex Anjou
+    // Duplex Anjou — acquisition (écriture bilancielle, montant = 0 pour ne pas fausser le P&L)
     {
       id: "tx_achat_anjou",
       immeubleId: "imm_duplex_anjou",
-      type: "DEPENSE",
+      type: "ACQUISITION",
       categorie: "AUTRE",
-      montant: 829000,
+      montant: 0,
       date: new Date("2026-03-20"),
       description: "Achat — 8450-8452 av. Sublaines, Anjou (Centris 10602915)",
       fournisseur: "Notaire",
       methodePaiement: "VIREMENT",
       recurrent: false,
+      notes: "Prix d'achat : 829 000 $",
+      miseDesFonds: 165800,       // ~20 %
+      montantHypotheque: 663200,  // ~80 %
+      fraisClosing: 12000,
       createdAt: new Date("2026-03-20"),
       updatedAt: new Date("2026-03-20"),
     },
