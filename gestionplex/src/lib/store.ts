@@ -11,7 +11,12 @@ export interface StoreData {
   logements: Record<string, Partial<{ loyerMensuel: number; statut: string; notes: string }>>;
   locataires: Record<string, Partial<{ email: string; telephone: string; notes: string }>>;
   demandesOverrides: Record<string, Partial<{ statut: string; notes: string; cout: number; fournisseurAssigne: string; dateFermeture: string }>>;
-  transactionsOverrides: Record<string, Partial<{ montant: number; description: string; categorie: string; type: string }>>;
+  transactionsOverrides: Record<string, Partial<{
+    montant: number; description: string; categorie: string; type: string;
+    portionInteret: number; portionCapital: number;
+    dateMiseEnService: string; dureeUtileAns: number;
+    miseDesFonds: number; montantHypotheque: number; fraisClosing: number;
+  }>>;
   transactions: Array<{
     id: string;
     immeubleId: string;
@@ -24,6 +29,16 @@ export interface StoreData {
     methodePaiement?: string;
     fournisseur?: string;
     notes?: string;
+    // Remboursement hypothèque
+    portionInteret?: number;
+    portionCapital?: number;
+    // CapEx
+    dateMiseEnService?: string;
+    dureeUtileAns?: number;
+    // Acquisition
+    miseDesFonds?: number;
+    montantHypotheque?: number;
+    fraisClosing?: number;
   }>;
   demandesEntretien: Array<{
     id: string;
@@ -107,7 +122,12 @@ export function updateDemandeEntretien(id: string, overrides: Partial<{ statut: 
   writeStore(store);
 }
 
-export function updateTransaction(id: string, overrides: Partial<{ montant: number; description: string; categorie: string; type: string }>) {
+export function updateTransaction(id: string, overrides: Partial<{
+  montant: number; description: string; categorie: string; type: string;
+  portionInteret: number; portionCapital: number;
+  dateMiseEnService: string; dureeUtileAns: number;
+  miseDesFonds: number; montantHypotheque: number; fraisClosing: number;
+}>) {
   const store = readStore();
   if (!store.transactionsOverrides) store.transactionsOverrides = {};
   store.transactionsOverrides[id] = { ...store.transactionsOverrides[id], ...overrides };

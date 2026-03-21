@@ -4,21 +4,54 @@ export type TypeImmeuble = "TRIPLEX" | "DUPLEX" | "QUADRUPLEX" | "IMMEUBLE" | "M
 export type StatutLogement = "OCCUPE" | "VACANT" | "EN_RENOVATION";
 export type StatutLocataire = "ACTIF" | "ANCIEN" | "EN_ATTENTE";
 export type StatutBail = "ACTIF" | "EXPIRE" | "EN_RENOUVELLEMENT";
-export type TypeTransaction = "REVENU" | "DEPENSE";
+export type TypeTransaction =
+  | "REVENU"
+  | "DEPENSE"                   // legacy — traité comme DEPENSE_EXPLOITATION
+  | "DEPENSE_EXPLOITATION"      // charge opérationnelle (P&L)
+  | "DEPENSE_CAPITAL"           // immobilisation amortissable (bilan)
+  | "REMBOURSEMENT_HYPOTHEQUE"  // scindé : intérêts (charge) + capital (passif)
+  | "ACQUISITION"               // achat de propriété (écriture au bilan)
+  | "TRANSFERT"                 // virement inter-comptes
+  | "DEPOT_CAUTION";            // dépôt de garantie locataire (passif)
+
 export type CategorieTransaction =
+  // Revenus
   | "LOYER"
   | "STATIONNEMENT"
   | "BUANDERIE"
+  | "RANGEMENT"
+  | "FRAIS_ANIMAUX"
+  | "AUTRE_REVENU"
+  // Dépenses exploitation
   | "REPARATION"
+  | "ENTRETIEN"
+  | "DENEIGEMENT"
+  | "NETTOYAGE"
   | "ASSURANCE"
   | "TAXES_MUNICIPALES"
   | "TAXES_SCOLAIRES"
-  | "HYPOTHEQUE"
-  | "DENEIGEMENT"
-  | "ENTRETIEN"
-  | "RENOVATION"
   | "ELECTRICITE"
   | "GAZ"
+  | "EAU"
+  | "GESTION"
+  | "COMPTABILITE"
+  | "PUBLICITE"
+  | "INTERETS_HYPOTHECAIRES"
+  | "FRAIS_BANCAIRES"
+  | "AUTRE_DEPENSE"
+  // Dépenses capital
+  | "TOITURE"
+  | "HVAC"
+  | "FENETRES"
+  | "CUISINE_SDB"
+  | "FONDATION"
+  | "ELECTRICITE_MAJEURE"
+  | "PLOMBERIE_MAJEURE"
+  | "APPAREILS"
+  | "AUTRE_CAPITAL"
+  // Legacy (compatibilité données mock)
+  | "HYPOTHEQUE"
+  | "RENOVATION"
   | "AUTRE";
 export type MethodePaiement = "VIREMENT" | "CHEQUE" | "COMPTANT" | "PRELEVEMENT";
 export type PrioriteEntretien = "URGENTE" | "HAUTE" | "NORMALE" | "BASSE";
@@ -146,6 +179,16 @@ export interface Transaction {
   recurrent: boolean;
   recurrenceJour?: number;
   notes?: string;
+  // Scission hypothèque (REMBOURSEMENT_HYPOTHEQUE)
+  portionInteret?: number;
+  portionCapital?: number;
+  // Dépense capital (DEPENSE_CAPITAL)
+  dateMiseEnService?: string;
+  dureeUtileAns?: number;
+  // Acquisition (ACQUISITION)
+  miseDesFonds?: number;
+  montantHypotheque?: number;
+  fraisClosing?: number;
   createdAt: Date;
   updatedAt: Date;
   immeuble?: Immeuble;
