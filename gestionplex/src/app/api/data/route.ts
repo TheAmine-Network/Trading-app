@@ -28,8 +28,12 @@ export async function GET() {
     ...(store.locataires[l.id] ?? {}),
   }));
 
-  // Fusionner les transactions
-  const transactions = [...baseTransactions, ...store.transactions];
+  // Fusionner les transactions + appliquer les overrides
+  const txOverrides = store.transactionsOverrides ?? {};
+  const transactions = [...baseTransactions, ...store.transactions].map(t => ({
+    ...t,
+    ...(txOverrides[t.id] ?? {}),
+  }));
 
   // Fusionner les demandes d'entretien + appliquer les overrides de statut
   const overrides = store.demandesOverrides ?? {};

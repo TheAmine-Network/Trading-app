@@ -11,6 +11,7 @@ export interface StoreData {
   logements: Record<string, Partial<{ loyerMensuel: number; statut: string; notes: string }>>;
   locataires: Record<string, Partial<{ email: string; telephone: string; notes: string }>>;
   demandesOverrides: Record<string, Partial<{ statut: string; notes: string; cout: number; fournisseurAssigne: string; dateFermeture: string }>>;
+  transactionsOverrides: Record<string, Partial<{ montant: number; description: string; categorie: string; type: string }>>;
   transactions: Array<{
     id: string;
     immeubleId: string;
@@ -48,6 +49,7 @@ const DEFAULT_STORE: StoreData = {
   logements: {},
   locataires: {},
   demandesOverrides: {},
+  transactionsOverrides: {},
   transactions: [],
   demandesEntretien: [],
   rappels: [],
@@ -102,5 +104,12 @@ export function updateDemandeEntretien(id: string, overrides: Partial<{ statut: 
   const store = readStore();
   if (!store.demandesOverrides) store.demandesOverrides = {};
   store.demandesOverrides[id] = { ...store.demandesOverrides[id], ...overrides };
+  writeStore(store);
+}
+
+export function updateTransaction(id: string, overrides: Partial<{ montant: number; description: string; categorie: string; type: string }>) {
+  const store = readStore();
+  if (!store.transactionsOverrides) store.transactionsOverrides = {};
+  store.transactionsOverrides[id] = { ...store.transactionsOverrides[id], ...overrides };
   writeStore(store);
 }
