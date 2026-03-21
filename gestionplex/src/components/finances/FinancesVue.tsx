@@ -162,13 +162,16 @@ export function FinancesVue() {
   }
 
   async function ajouterTransaction() {
-    if (!fDescription || !fMontant) return;
+    // Pour ACQUISITION : montant = 0 (écriture bilancielle, jamais compté en dépense)
+    const isAcquisition = fType === "ACQUISITION";
+    if (!fDescription || (!fMontant && !isAcquisition)) return;
     setFSaving(true);
 
     const body: Record<string, unknown> = {
       type: fType,
       description: fDescription,
-      montant: Number(fMontant),
+      // ACQUISITION → montant = 0 pour ne jamais fausser les calculs P&L
+      montant: isAcquisition ? 0 : Number(fMontant),
       categorie: fCategorie,
       immeubleId: fImmeubleId,
       date: fDate,
@@ -182,10 +185,13 @@ export function FinancesVue() {
       body.dureeUtileAns = Number(fDureeUtile);
       body.dateMiseEnService = fDate;
     }
-    if (fType === "ACQUISITION") {
-      body.miseDesFonds = fMiseDesFonds ? Number(fMiseDesFonds) : undefined;
-      body.montantHypotheque = fMontantHyp ? Number(fMontantHyp) : undefined;
-      body.fraisClosing = fFraisClosing ? Number(fFraisClosing) : undefined;
+    if (isAcquisition) {
+      // Stocker le prix d'achat séparément, dans un champ dédié (non-montant)
+      body.miseDesFonds    = fMiseDesFonds  ? Number(fMiseDesFonds)  : undefined;
+      body.montantHypotheque = fMontantHyp  ? Number(fMontantHyp)   : undefined;
+      body.fraisClosing    = fFraisClosing  ? Number(fFraisClosing)  : undefined;
+      // Prix d'achat → notes (référence seulement, pas un montant comptable)
+      if (fMontant) body.notes = `Prix d'achat : ${Number(fMontant).toLocaleString("fr-CA")} $`;
     }
 
     await fetch("/api/transactions", {
@@ -531,15 +537,15 @@ export function FinancesVue() {
                     } />
                 </div>
 
-                {/* Montant principal */}
-                <div>
-                  <label className="field-label">
-                    {fType === "ACQUISITION" ? "Prix d'achat ($)"
-                    : fType === "REMBOURSEMENT_HYPOTHEQUE" ? "Paiement total ($)"
-                    : "Montant ($)"}
-                  </label>
-                  <FormInput value={fMontant} onChange={setFMontant} type="number" placeholder="0.00" />
-                </div>
+                {/* Montant principal — masqué pour ACQUISITION (écriture bilancielle pure) */}
+                {fType !== "ACQUISITION" && (
+                  <div>
+                    <label className="field-label">
+                      {fType === "REMBOURSEMENT_HYPOTHEQUE" ? "Paiement total ($)" : "Montant ($)"}
+                    </label>
+                    <FormInput value={fMontant} onChange={setFMontant} type="number" placeholder="0.00" />
+                  </div>
+                )}
 
                 {/* Scission hypothèque */}
                 {fType === "REMBOURSEMENT_HYPOTHEQUE" && (
@@ -555,9 +561,23 @@ export function FinancesVue() {
                   </div>
                 )}
 
-                {/* Champs Acquisition */}
+                {/* Champs Acquisition — remplacent le champ montant */}
                 {fType === "ACQUISITION" && (
                   <>
+                    {/* Badge — clarté absolue */}
+                    <div className="flex items-center gap-2 rounded-xl px-3 py-2"
+                      style={{ background: "var(--success-muted)", color: "var(--success)" }}>
+                      <span className="text-sm">✅</span>
+                      <p className="text-xs font-semibold">
+                        Cette transaction n'apparaît <strong>jamais</strong> dans les dépenses ni le RNO — c'est une écriture bilancielle.
+                      </p>
+                    </div>
+
+                    <div>
+                      <label className="field-label">Prix d'achat ($) <span className="font-normal opacity-60">— référence seulement</span></label>
+                      <FormInput value={fMontant} onChange={setFMontant} type="number" placeholder="0.00" />
+                    </div>
+
                     <div className="grid grid-cols-2 gap-3">
                       <div>
                         <label className="field-label">Mise de fonds ($)</label>
@@ -607,9 +627,9 @@ export function FinancesVue() {
 
                 <motion.button whileTap={{ scale: 0.97 }}
                   onClick={ajouterTransaction}
-                  disabled={!fDescription || !fMontant || fSaving}
+                  disabled={!fDescription || (!fMontant && fType !== "ACQUISITION") || fSaving}
                   className="btn-primary w-full justify-center rounded-xl py-3 text-sm"
-                  style={{ opacity: !fDescription || !fMontant ? 0.5 : 1 }}>
+                  style={{ opacity: !fDescription || (!fMontant && fType !== "ACQUISITION") ? 0.5 : 1 }}>
                   {fSaving ? "Enregistrement…" : "Enregistrer"}
                 </motion.button>
               </div>
