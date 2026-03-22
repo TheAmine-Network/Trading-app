@@ -93,7 +93,10 @@ export function ImmeubleDetail({ id }: ImmeubleDetailProps) {
       {/* Hero */}
       <div className="relative h-64 w-full overflow-hidden" style={{ background: "var(--bg-tertiary)" }}>
         {immeuble.coordinates ? (
-          <SatelliteView lat={immeuble.coordinates.lat} lng={immeuble.coordinates.lng} label={immeuble.nom} />
+          <SatelliteView
+            address={`${immeuble.adresse}, ${immeuble.ville}, ${immeuble.province} ${immeuble.codePostal}`}
+            label={immeuble.nom}
+          />
         ) : immeuble.photoUrl ? (
           <Image src={immeuble.photoUrl} alt={immeuble.nom} fill className="object-cover" priority sizes="100vw" />
         ) : (

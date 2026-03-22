@@ -92,8 +92,7 @@ export function ImmeublesListe() {
                   <div className="relative h-44 w-full overflow-hidden">
                     {immeuble.coordinates ? (
                       <SatelliteView
-                        lat={immeuble.coordinates.lat}
-                        lng={immeuble.coordinates.lng}
+                        address={`${immeuble.adresse}, ${immeuble.ville}, ${immeuble.province} ${immeuble.codePostal}`}
                         label={immeuble.nom}
                         className="h-44 w-full"
                       />
