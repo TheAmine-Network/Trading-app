@@ -15,6 +15,8 @@ import {
   ArrowUpRight,
   RefreshCw,
   Check,
+  Zap,
+  Loader2,
 } from "lucide-react";
 import Link from "next/link";
 import { StatCard } from "./StatCard";
@@ -83,16 +85,66 @@ const EMAIL_CONFIG = {
 // ─── Dashboard ─────────────────────────────────────────────────────────────────
 
 export function DashboardPage() {
-  const { transactions, demandesEntretien, rappels, logements, immeubles, getTauxOccupation } = useAppData();
+  const { transactions, demandesEntretien, rappels, logements, immeubles, baux, locataires, getTauxOccupation, refresh } = useAppData();
   const [gmailVisible, setGmailVisible] = useState(true);
   const [emailsTraites, setEmailsTraites] = useState<Set<string>>(new Set());
   const [gmailSyncing, setGmailSyncing] = useState(false);
+  const [generatingLoyers, setGeneratingLoyers] = useState(false);
+  const [loyersGeneres, setLoyersGeneres] = useState(false);
 
   const maintenant = new Date();
   const statsActuels = statsFinancieresMois(transactions, maintenant.getFullYear(), maintenant.getMonth());
   const statsMoisPrec = statsFinancieresMois(transactions, maintenant.getFullYear(), maintenant.getMonth() - 1);
   const donneesMois = statsParMois(transactions, 6);
   const { nbOccupes, nbTotal, taux } = getTauxOccupation();
+
+  // ── Loyers manquants ce mois ────────────────────────────────────────────────
+  const debutMois = new Date(maintenant.getFullYear(), maintenant.getMonth(), 1);
+  const finMois   = new Date(maintenant.getFullYear(), maintenant.getMonth() + 1, 0);
+  const logementIdsAvecLoyer = new Set(
+    transactions
+      .filter(t => t.type === "REVENU" && t.categorie === "LOYER" &&
+        new Date(t.date) >= debutMois && new Date(t.date) <= finMois)
+      .map(t => t.logementId)
+      .filter(Boolean)
+  );
+  const loyersManquants = baux
+    .filter(b => b.statut === "ACTIF" && !logementIdsAvecLoyer.has(b.logementId))
+    .map(b => ({
+      bail: b,
+      logement: logements.find(l => l.id === b.logementId),
+      locataire: locataires.find(l => l.id === b.locataireId),
+      immeuble: immeubles.find(i => i.id === logements.find(l => l.id === b.logementId)?.immeubleId),
+    }))
+    .filter(e => e.logement?.statut === "OCCUPE");
+  const totalLoyersManquants = loyersManquants.reduce((s, e) => s + e.bail.loyerMensuel, 0);
+
+  async function genererTousLesLoyers() {
+    setGeneratingLoyers(true);
+    const nomMois = debutMois.toLocaleDateString("fr-CA", { month: "long", year: "numeric" });
+    await Promise.all(
+      loyersManquants.map(({ bail, logement, locataire, immeuble }) =>
+        fetch("/api/transactions", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            immeubleId: immeuble?.id ?? logement?.immeubleId,
+            logementId: logement?.id,
+            type: "REVENU",
+            categorie: "LOYER",
+            montant: bail.loyerMensuel,
+            date: debutMois.toISOString(),
+            description: `Loyer ${nomMois} — ${locataire?.prenom ?? ""} ${locataire?.nom ?? ""}${logement ? ` (${logement.numero})` : ""}`.trim(),
+            methodePaiement: "VIREMENT",
+            recurrent: true,
+          }),
+        })
+      )
+    );
+    setGeneratingLoyers(false);
+    setLoyersGeneres(true);
+    refresh();
+  }
 
   const tendanceRevenus = statsMoisPrec.revenus > 0
     ? ((statsActuels.revenus - statsMoisPrec.revenus) / statsMoisPrec.revenus) * 100 : 0;
@@ -248,6 +300,55 @@ export function DashboardPage() {
             </div>
           </div>
         </motion.section>
+
+        {/* ── Banner loyers manquants ───────────────────────────────────── */}
+        <AnimatePresence>
+          {!loyersGeneres && loyersManquants.length > 0 && (
+            <motion.section
+              initial={{ opacity: 0, y: -8 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, height: 0 }}
+              className="rounded-2xl p-4"
+              style={{ background: "linear-gradient(135deg, rgba(52,199,89,0.15) 0%, rgba(48,219,91,0.08) 100%)", border: "1px solid rgba(52,199,89,0.3)" }}>
+              <div className="flex items-start gap-3">
+                <div className="flex h-9 w-9 flex-shrink-0 items-center justify-center rounded-xl" style={{ background: "rgba(52,199,89,0.2)" }}>
+                  <Zap className="h-4.5 w-4.5" style={{ color: "var(--success)" }} />
+                </div>
+                <div className="flex-1 min-w-0">
+                  <p className="text-sm font-bold" style={{ color: "var(--success)" }}>
+                    {loyersManquants.length} loyer{loyersManquants.length > 1 ? "s" : ""} non enregistré{loyersManquants.length > 1 ? "s" : ""}
+                  </p>
+                  <p className="text-xs mt-0.5" style={{ color: "var(--fg-muted)" }}>
+                    {maintenant.toLocaleDateString("fr-CA", { month: "long" })} · {formatCAD(totalLoyersManquants)} à encaisser
+                  </p>
+                  <p className="text-xs mt-1" style={{ color: "var(--fg-subtle)" }}>
+                    {loyersManquants.map(e => `${e.locataire?.prenom ?? "?"} (${e.logement?.numero ?? "?"})`).join(", ")}
+                  </p>
+                </div>
+                <motion.button
+                  whileTap={{ scale: 0.92 }}
+                  onClick={genererTousLesLoyers}
+                  disabled={generatingLoyers}
+                  className="flex-shrink-0 flex items-center gap-1.5 rounded-xl px-3 py-2 text-xs font-bold text-white"
+                  style={{ background: generatingLoyers ? "var(--fg-muted)" : "var(--success)" }}>
+                  {generatingLoyers
+                    ? <Loader2 className="h-3.5 w-3.5 animate-spin" />
+                    : <Zap className="h-3.5 w-3.5" />}
+                  {generatingLoyers ? "…" : "Générer tout"}
+                </motion.button>
+              </div>
+            </motion.section>
+          )}
+          {loyersGeneres && (
+            <motion.div
+              initial={{ opacity: 0, scale: 0.95 }} animate={{ opacity: 1, scale: 1 }} exit={{ opacity: 0 }}
+              className="flex items-center gap-2 rounded-2xl px-4 py-3"
+              style={{ background: "rgba(52,199,89,0.12)", border: "1px solid rgba(52,199,89,0.25)" }}>
+              <Check className="h-4 w-4" style={{ color: "var(--success)" }} />
+              <span className="text-sm font-semibold" style={{ color: "var(--success)" }}>
+                {loyersManquants.length === 0 ? "Loyers déjà enregistrés" : `${loyersManquants.length} loyer${loyersManquants.length > 1 ? "s" : ""} enregistré${loyersManquants.length > 1 ? "s" : ""} — ${formatCAD(totalLoyersManquants)}`}
+              </span>
+            </motion.div>
+          )}
+        </AnimatePresence>
 
         {/* ── Actions rapides ───────────────────────────────────────────── */}
         <section>

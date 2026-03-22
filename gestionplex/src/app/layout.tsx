@@ -3,6 +3,7 @@ import "./globals.css";
 import { ChatBot } from "@/components/chatbot/ChatBot";
 import { DataProvider } from "@/lib/DataContext";
 import { Sidebar } from "@/components/layout/Sidebar";
+import { QuickAddFAB } from "@/components/layout/QuickAddFAB";
 
 export const metadata: Metadata = {
   title: "GestionPlex — Gestion immobilière",
@@ -57,6 +58,7 @@ export default function RootLayout({ children }: Readonly<{ children: React.Reac
           </div>
 
           <ChatBot />
+          <QuickAddFAB />
         </DataProvider>
       </body>
     </html>

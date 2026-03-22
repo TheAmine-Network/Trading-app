@@ -4,7 +4,7 @@ import { useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import {
   TrendingUp, TrendingDown, DollarSign, Home,
-  Plus, X, ChevronRight, Info, Building2,
+  Plus, X, ChevronRight, Info, Building2, Copy,
 } from "lucide-react";
 import Link from "next/link";
 import { PieChart, Pie, Cell, Tooltip, ResponsiveContainer, Legend } from "recharts";
@@ -145,6 +145,19 @@ export function FinancesVue() {
       body: JSON.stringify(body),
     });
     refresh();
+  }
+
+  function dupliquerTx(tx: import("@/types").Transaction) {
+    setFType(tx.type);
+    setFDescription(`Copie — ${tx.description}`);
+    setFMontant(String(tx.montant));
+    setFCategorie(tx.categorie);
+    if (tx.immeubleId) setFImmeubleId(tx.immeubleId);
+    setFDate(new Date().toISOString().slice(0, 10));
+    if (tx.portionInteret) setFPortionInteret(String(tx.portionInteret));
+    if (tx.portionCapital) setFPortionCapital(String(tx.portionCapital));
+    if (tx.dureeUtileAns) setFDureeUtile(String(tx.dureeUtileAns));
+    setFormulaireOuvert(true);
   }
 
   // ── Formulaire ───────────────────────────────────────────────────────────
@@ -357,7 +370,7 @@ export function FinancesVue() {
               const estRevenu = tx.type === "REVENU";
 
               return (
-                <div key={tx.id} className="card flex items-start gap-3 px-4 py-3">
+                <div key={tx.id} className="group card flex items-start gap-3 px-4 py-3">
                   {/* Icône / catégorie */}
                   <InlineStatut value={tx.categorie}
                     options={(CATEGORIES_PAR_TYPE[tx.type] ?? ["AUTRE"]).map(c => ({
@@ -414,6 +427,15 @@ export function FinancesVue() {
                       </div>
                     )}
                   </div>
+
+                  {/* Dupliquer */}
+                  <motion.button whileTap={{ scale: 0.85 }}
+                    onClick={() => dupliquerTx(tx)}
+                    className="flex-shrink-0 flex h-7 w-7 items-center justify-center rounded-full opacity-0 group-hover:opacity-100 transition-opacity"
+                    style={{ background: "var(--bg-tertiary)", color: "var(--fg-muted)" }}
+                    title="Dupliquer">
+                    <Copy className="h-3.5 w-3.5" />
+                  </motion.button>
 
                   {/* Montant éditable */}
                   <InlineEdit value={tx.montant} type="number"
