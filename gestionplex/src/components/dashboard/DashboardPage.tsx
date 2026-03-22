@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect, useCallback } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import {
   TrendingUp,
@@ -68,11 +68,11 @@ interface EmailCard {
   actionLabel?: string;
 }
 
-const DEMO_EMAILS: EmailCard[] = [
-  { id: "e1", type: "LOYER", titre: "Paiement loyer mars", expediteur: "Sophie Tremblay", montant: 1450, date: new Date(Date.now() - 86400000), actionLabel: "Enregistrer" },
-  { id: "e2", type: "ENTRETIEN", titre: "Fuite d'eau — URGENT", expediteur: "Jean-Marc Dubois", date: new Date(), actionLabel: "Créer demande" },
-  { id: "e3", type: "BAIL", titre: "Renouvellement bail 2025", expediteur: "Marie Côté", date: new Date(Date.now() - 3 * 86400000), actionLabel: "Voir bail" },
-];
+const ACTION_LABELS: Record<string, string> = {
+  ENREGISTRER_TRANSACTION: "Enregistrer",
+  CREER_ENTRETIEN: "Créer demande",
+  RENOUVELER_BAIL: "Voir bail",
+};
 
 const EMAIL_CONFIG = {
   LOYER:     { couleur: "#34c759", bg: "rgba(52,199,89,0.1)",    icone: "💰" },
@@ -89,8 +89,50 @@ export function DashboardPage() {
   const [gmailVisible, setGmailVisible] = useState(true);
   const [emailsTraites, setEmailsTraites] = useState<Set<string>>(new Set());
   const [gmailSyncing, setGmailSyncing] = useState(false);
+  const [gmailConnected, setGmailConnected] = useState(false);
+  const [gmailEmails, setGmailEmails] = useState<EmailCard[]>([]);
+  const [gmailLoading, setGmailLoading] = useState(true);
   const [generatingLoyers, setGeneratingLoyers] = useState(false);
   const [loyersGeneres, setLoyersGeneres] = useState(false);
+
+  const fetchGmailEmails = useCallback(async () => {
+    setGmailSyncing(true);
+    try {
+      const res = await fetch("/api/gmail/sync");
+      if (res.status === 401) {
+        setGmailConnected(false);
+        setGmailEmails([]);
+        return;
+      }
+      const data = await res.json();
+      if (data.connected) {
+        setGmailConnected(true);
+        const cards: EmailCard[] = (data.emails ?? [])
+          .filter((e: { type: string }) => e.type !== "AUTRE")
+          .map((e: { messageId: string; type: string; sujet: string; expediteur: string; montant?: number; date: string; action?: { type: string } }) => ({
+            id: e.messageId,
+            type: e.type as EmailCard["type"],
+            titre: e.sujet,
+            expediteur: e.expediteur,
+            montant: e.montant,
+            date: new Date(e.date),
+            actionLabel: e.action ? ACTION_LABELS[e.action.type] : undefined,
+          }));
+        setGmailEmails(cards);
+      } else {
+        setGmailConnected(false);
+        setGmailEmails([]);
+      }
+    } catch {
+      setGmailConnected(false);
+      setGmailEmails([]);
+    } finally {
+      setGmailSyncing(false);
+      setGmailLoading(false);
+    }
+  }, []);
+
+  useEffect(() => { fetchGmailEmails(); }, [fetchGmailEmails]);
 
   const maintenant = new Date();
   const statsActuels = statsFinancieresMois(transactions, maintenant.getFullYear(), maintenant.getMonth());
@@ -156,7 +198,7 @@ export function DashboardPage() {
 
   const jourSemaine = maintenant.toLocaleDateString("fr-CA", { weekday: "long" });
   const dateAujourd = maintenant.toLocaleDateString("fr-CA", { day: "numeric", month: "long" });
-  const emailsRestants = DEMO_EMAILS.filter(e => !emailsTraites.has(e.id));
+  const emailsRestants = gmailEmails.filter(e => !emailsTraites.has(e.id));
 
   return (
     <div className="min-h-screen" style={{ background: "var(--bg)" }}>
@@ -228,58 +270,72 @@ export function DashboardPage() {
 
         {/* ── Gmail ─────────────────────────────────────────────────────── */}
         <AnimatePresence>
-          {gmailVisible && emailsRestants.length > 0 && (
+          {gmailVisible && !gmailLoading && (
             <motion.section initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, height: 0 }}>
               <div className="mb-3 flex items-center justify-between">
                 <div className="flex items-center gap-2">
                   <div className="flex h-6 w-6 items-center justify-center rounded-lg" style={{ background: "rgba(234,67,53,0.12)" }}>
                     <Mail className="h-3.5 w-3.5" style={{ color: "#ea4335" }} />
                   </div>
-                  <h2 className="section-title">Gmail — {emailsRestants.length} à traiter</h2>
+                  <h2 className="section-title">
+                    {gmailConnected ? `Gmail — ${emailsRestants.length} à traiter` : "Gmail"}
+                  </h2>
                 </div>
                 <div className="flex items-center gap-3">
-                  <button onClick={() => { setGmailSyncing(true); setTimeout(() => setGmailSyncing(false), 1500); }}
-                    className="flex items-center gap-1 text-xs" style={{ color: "var(--accent)" }}>
-                    <RefreshCw className={`h-3 w-3 ${gmailSyncing ? "animate-spin" : ""}`} />Sync
-                  </button>
+                  {gmailConnected && (
+                    <button onClick={fetchGmailEmails}
+                      className="flex items-center gap-1 text-xs" style={{ color: "var(--accent)" }}>
+                      <RefreshCw className={`h-3 w-3 ${gmailSyncing ? "animate-spin" : ""}`} />Sync
+                    </button>
+                  )}
                   <button onClick={() => setGmailVisible(false)} className="text-xs" style={{ color: "var(--fg-muted)" }}>Masquer</button>
                 </div>
               </div>
               <div className="space-y-2">
-                {emailsRestants.map((email, i) => {
-                  const config = EMAIL_CONFIG[email.type];
-                  return (
-                    <motion.div key={email.id} initial={{ opacity: 0, x: -10 }} animate={{ opacity: 1, x: 0 }}
-                      exit={{ opacity: 0, x: 10, height: 0 }} transition={{ delay: i * 0.06 }}
-                      className="card flex items-center gap-3 px-4 py-3.5">
-                      <div className="flex h-9 w-9 flex-shrink-0 items-center justify-center rounded-xl text-lg" style={{ background: config.bg }}>
-                        {config.icone}
-                      </div>
-                      <div className="min-w-0 flex-1">
-                        <p className="truncate text-sm font-semibold" style={{ color: "var(--fg)" }}>{email.titre}</p>
-                        <p className="text-xs" style={{ color: "var(--fg-muted)" }}>
-                          {email.expediteur}{email.montant ? ` · ${formatCAD(email.montant)}` : ""}{" · "}{formatDateRelative(email.date)}
-                        </p>
-                      </div>
-                      {email.actionLabel && (
-                        <motion.button whileTap={{ scale: 0.9 }} onClick={() => setEmailsTraites(p => new Set([...p, email.id]))}
-                          className="flex-shrink-0 rounded-full px-3 py-1.5 text-xs font-semibold text-white"
-                          style={{ background: config.couleur }}>
-                          {email.actionLabel}
-                        </motion.button>
-                      )}
-                      <motion.button whileTap={{ scale: 0.9 }} onClick={() => setEmailsTraites(p => new Set([...p, email.id]))}
-                        className="flex h-7 w-7 flex-shrink-0 items-center justify-center rounded-full"
-                        style={{ background: "var(--bg-tertiary)" }}>
-                        <Check className="h-3.5 w-3.5" style={{ color: "var(--fg-muted)" }} />
-                      </motion.button>
-                    </motion.div>
-                  );
-                })}
-                <Link href="/api/gmail/auth" className="flex items-center justify-center gap-2 rounded-2xl py-2.5 text-sm font-medium"
-                  style={{ background: "var(--accent-muted)", color: "var(--accent)" }}>
-                  <Sparkles className="h-4 w-4" />Connecter Gmail<ArrowUpRight className="h-4 w-4" />
-                </Link>
+                {gmailConnected ? (
+                  emailsRestants.length > 0 ? (
+                    emailsRestants.map((email, i) => {
+                      const config = EMAIL_CONFIG[email.type];
+                      return (
+                        <motion.div key={email.id} initial={{ opacity: 0, x: -10 }} animate={{ opacity: 1, x: 0 }}
+                          exit={{ opacity: 0, x: 10, height: 0 }} transition={{ delay: i * 0.06 }}
+                          className="card flex items-center gap-3 px-4 py-3.5">
+                          <div className="flex h-9 w-9 flex-shrink-0 items-center justify-center rounded-xl text-lg" style={{ background: config.bg }}>
+                            {config.icone}
+                          </div>
+                          <div className="min-w-0 flex-1">
+                            <p className="truncate text-sm font-semibold" style={{ color: "var(--fg)" }}>{email.titre}</p>
+                            <p className="text-xs" style={{ color: "var(--fg-muted)" }}>
+                              {email.expediteur}{email.montant ? ` · ${formatCAD(email.montant)}` : ""}{" · "}{formatDateRelative(email.date)}
+                            </p>
+                          </div>
+                          {email.actionLabel && (
+                            <motion.button whileTap={{ scale: 0.9 }} onClick={() => setEmailsTraites(p => new Set([...p, email.id]))}
+                              className="flex-shrink-0 rounded-full px-3 py-1.5 text-xs font-semibold text-white"
+                              style={{ background: config.couleur }}>
+                              {email.actionLabel}
+                            </motion.button>
+                          )}
+                          <motion.button whileTap={{ scale: 0.9 }} onClick={() => setEmailsTraites(p => new Set([...p, email.id]))}
+                            className="flex h-7 w-7 flex-shrink-0 items-center justify-center rounded-full"
+                            style={{ background: "var(--bg-tertiary)" }}>
+                            <Check className="h-3.5 w-3.5" style={{ color: "var(--fg-muted)" }} />
+                          </motion.button>
+                        </motion.div>
+                      );
+                    })
+                  ) : (
+                    <div className="flex items-center justify-center rounded-2xl py-4 text-sm"
+                      style={{ color: "var(--fg-muted)", background: "var(--bg-secondary)" }}>
+                      Aucun email pertinent trouvé
+                    </div>
+                  )
+                ) : (
+                  <Link href="/api/gmail/auth" className="flex items-center justify-center gap-2 rounded-2xl py-2.5 text-sm font-medium"
+                    style={{ background: "var(--accent-muted)", color: "var(--accent)" }}>
+                    <Sparkles className="h-4 w-4" />Connecter Gmail<ArrowUpRight className="h-4 w-4" />
+                  </Link>
+                )}
               </div>
             </motion.section>
           )}
