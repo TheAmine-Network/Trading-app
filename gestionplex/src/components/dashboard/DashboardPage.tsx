@@ -25,7 +25,7 @@ import { RevenueChart } from "./RevenueChart";
 import { QuickActions } from "./QuickActions";
 import { Badge } from "@/components/ui/badge";
 import { formatCAD, formatDateRelative, formatDate } from "@/lib/formatters";
-import { PRIORITE_LABELS } from "@/lib/constants";
+import { PRIORITE_LABELS, APP_PROPRIETAIRE } from "@/lib/constants";
 import { useAppData } from "@/lib/DataContext";
 import type { Transaction } from "@/types";
 
@@ -220,7 +220,7 @@ export function DashboardPage() {
             </motion.p>
             <motion.h1 initial={{ opacity: 0, y: -6 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.08 }}
               className="mt-0.5 text-2xl font-bold text-white" style={{ letterSpacing: "-0.02em" }}>
-              Bonjour, Amine 👋
+              Bonjour, {APP_PROPRIETAIRE} 👋
             </motion.h1>
             <motion.p initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ delay: 0.15 }}
               className="mt-1 text-sm" style={{ color: "rgba(255,255,255,0.45)" }}>
@@ -237,7 +237,7 @@ export function DashboardPage() {
               )}
             </motion.button>
             <div className="flex h-10 w-10 items-center justify-center rounded-2xl text-sm font-bold text-white"
-              style={{ background: "var(--gradient-brand)" }}>A</div>
+              style={{ background: "var(--gradient-brand)" }}>{APP_PROPRIETAIRE[0]}</div>
           </div>
         </div>
 

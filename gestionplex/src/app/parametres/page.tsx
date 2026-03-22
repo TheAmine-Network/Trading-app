@@ -2,9 +2,11 @@
 
 import { useState } from "react";
 import { motion } from "framer-motion";
-import { ArrowLeft, User, Bell, Sun, Moon, Download, FileText, ChevronRight, Building2 } from "lucide-react";
+import { ArrowLeft, Bell, Sun, Moon, Download, FileText, ChevronRight } from "lucide-react";
 import Link from "next/link";
 import { MobileNav } from "@/components/layout/MobileNav";
+import { useAppData } from "@/lib/DataContext";
+import { APP_NOM, APP_PROPRIETAIRE } from "@/lib/constants";
 
 function Toggle({ active, onChange }: { active: boolean; onChange: (v: boolean) => void }) {
   return (
@@ -48,6 +50,7 @@ function Ligne({ label, description, action }: { label: string; description?: st
 }
 
 export default function ParametresPage() {
+  const { immeubles } = useAppData();
   const [notifEmail, setNotifEmail] = useState(true);
   const [notifPush, setNotifPush] = useState(false);
   const [themeSombre, setThemeSombre] = useState(false);
@@ -67,27 +70,30 @@ export default function ParametresPage() {
         <div className="space-y-5 px-5 py-5">
           {/* Profil */}
           <div className="flex items-center gap-4 rounded-2xl border border-gray-200/80 bg-white p-5 dark:border-gray-800 dark:bg-gray-900">
-            <div className="flex h-16 w-16 items-center justify-center rounded-full bg-blue-600 text-2xl font-bold text-white">A</div>
+            <div className="flex h-16 w-16 items-center justify-center rounded-full bg-blue-600 text-2xl font-bold text-white">
+              {APP_PROPRIETAIRE[0]}
+            </div>
             <div>
-              <p className="text-lg font-bold text-gray-900 dark:text-gray-100">Amine</p>
-              <p className="text-sm text-gray-500">amine@gestionplex.ca</p>
-              <p className="mt-1 text-xs text-blue-600 dark:text-blue-400">Propriétaire · 2 immeubles</p>
+              <p className="text-lg font-bold text-gray-900 dark:text-gray-100">{APP_PROPRIETAIRE}</p>
+              <p className="mt-1 text-xs text-blue-600 dark:text-blue-400">
+                Propriétaire · {immeubles.length} immeuble{immeubles.length > 1 ? "s" : ""}
+              </p>
             </div>
           </div>
 
           {/* Immeubles */}
-          <Section titre="Immeubles">
-            <Ligne
-              label="Triplex Laval — Hébert"
-              description="1671-1675, rue Hébert, Laval (Chomedey)"
-              action={<ChevronRight className="h-4 w-4 text-gray-400" />}
-            />
-            <Ligne
-              label="Duplex Anjou — Sublaines"
-              description="8450-8452, av. Sublaines, Montréal (Anjou)"
-              action={<ChevronRight className="h-4 w-4 text-gray-400" />}
-            />
-          </Section>
+          {immeubles.length > 0 && (
+            <Section titre="Immeubles">
+              {immeubles.map(imm => (
+                <Ligne
+                  key={imm.id}
+                  label={imm.nom}
+                  description={`${imm.adresse}, ${imm.ville}`}
+                  action={<ChevronRight className="h-4 w-4 text-gray-400" />}
+                />
+              ))}
+            </Section>
+          )}
 
           {/* Notifications */}
           <Section titre="Notifications">
@@ -146,7 +152,7 @@ export default function ParametresPage() {
           <Section titre="À propos">
             <Ligne label="Version" action={<span className="text-sm text-gray-400">1.0.0</span>} />
             <Ligne
-              label="GestionPlex"
+              label={APP_NOM}
               description="Application de gestion immobilière personnelle"
               action={<ChevronRight className="h-4 w-4 text-gray-400" />}
             />
