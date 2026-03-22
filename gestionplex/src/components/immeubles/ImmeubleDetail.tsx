@@ -11,6 +11,7 @@ import Image from "next/image";
 import { travauxAnjou, travauxLaval } from "@/lib/renovations";
 import { RenovationTracker } from "./RenovationTracker";
 import { formatCAD, formatDate } from "@/lib/formatters";
+import { MapMini, SatelliteView } from "@/components/ui/MapMini";
 import { Badge } from "@/components/ui/badge";
 import { InlineEdit } from "@/components/ui/InlineEdit";
 import { InlineStatut } from "@/components/ui/InlineStatut";
@@ -91,14 +92,16 @@ export function ImmeubleDetail({ id }: ImmeubleDetailProps) {
     <div className="min-h-screen" style={{ background: "var(--bg)" }}>
       {/* Hero */}
       <div className="relative h-64 w-full overflow-hidden" style={{ background: "var(--bg-tertiary)" }}>
-        {immeuble.photoUrl ? (
+        {immeuble.coordinates ? (
+          <SatelliteView lat={immeuble.coordinates.lat} lng={immeuble.coordinates.lng} label={immeuble.nom} />
+        ) : immeuble.photoUrl ? (
           <Image src={immeuble.photoUrl} alt={immeuble.nom} fill className="object-cover" priority sizes="100vw" />
         ) : (
           <div className="flex h-full items-center justify-center">
             <Home className="h-16 w-16" style={{ color: "var(--fg-subtle)" }} />
           </div>
         )}
-        <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-black/20 to-transparent" />
+        <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-black/20 to-transparent pointer-events-none" />
         <Link href="/immeubles"
           className="absolute left-4 top-4 flex h-9 w-9 items-center justify-center rounded-full backdrop-blur-sm"
           style={{ background: "rgba(255,255,255,0.85)", color: "#1c1c1e" }}>
@@ -189,6 +192,21 @@ export function ImmeubleDetail({ id }: ImmeubleDetailProps) {
                 </div>
               )}
             </div>
+
+            {immeuble.coordinates && (
+              <div>
+                <p className="section-title mb-2 px-1">Localisation</p>
+                <MapMini
+                  lat={immeuble.coordinates.lat}
+                  lng={immeuble.coordinates.lng}
+                  label={immeuble.nom}
+                  className="h-40 w-full"
+                />
+                <p className="mt-1.5 px-1 text-xs" style={{ color: "var(--fg-subtle)" }}>
+                  {immeuble.adresse}, {immeuble.ville} {immeuble.codePostal}
+                </p>
+              </div>
+            )}
 
             {id === "imm_triplex_laval" && (
               <div className="rounded-2xl p-4"

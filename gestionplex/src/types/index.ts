@@ -92,6 +92,7 @@ export interface Immeuble {
   anneeConstruct?: number;
   nbLogements: number;
   photoUrl?: string;
+  coordinates?: { lat: number; lng: number };
   notes?: string;
   dateAchat?: Date;
   prixAchat?: number;

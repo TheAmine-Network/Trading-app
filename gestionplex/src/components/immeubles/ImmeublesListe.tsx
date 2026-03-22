@@ -2,6 +2,7 @@
 
 import { motion } from "framer-motion";
 import { Building2, MapPin, Home } from "lucide-react";
+import { SatelliteView } from "@/components/ui/MapMini";
 import Link from "next/link";
 import Image from "next/image";
 import { useAppData } from "@/lib/DataContext";
@@ -87,22 +88,29 @@ export function ImmeublesListe() {
                   whileHover={{ y: -2 }}
                   className="card overflow-hidden"
                 >
-                  {/* Photo */}
-                  {immeuble.photoUrl && (
-                    <div className="relative h-44 w-full overflow-hidden">
+                  {/* Photo / Vue satellite */}
+                  <div className="relative h-44 w-full overflow-hidden">
+                    {immeuble.coordinates ? (
+                      <SatelliteView
+                        lat={immeuble.coordinates.lat}
+                        lng={immeuble.coordinates.lng}
+                        label={immeuble.nom}
+                        className="h-44 w-full"
+                      />
+                    ) : immeuble.photoUrl ? (
                       <Image src={immeuble.photoUrl} alt={immeuble.nom} fill className="object-cover"
                         sizes="(max-width: 640px) 100vw, 640px" />
-                      <div className="absolute inset-0 bg-gradient-to-t from-black/50 to-transparent" />
-                      <div className="absolute bottom-3 left-4 right-4 flex items-end justify-between">
-                        <Badge variante="default" className="bg-white/90 text-gray-800">
-                          {immeuble.type === "TRIPLEX" ? "Triplex" : "Duplex"}
-                        </Badge>
-                        <span className="rounded-full bg-white/90 px-2.5 py-0.5 text-xs font-semibold text-gray-800">
-                          {formatCAD(revMensuels)}/mois
-                        </span>
-                      </div>
+                    ) : null}
+                    <div className="absolute inset-0 bg-gradient-to-t from-black/50 to-transparent pointer-events-none" />
+                    <div className="absolute bottom-3 left-4 right-4 flex items-end justify-between pointer-events-none">
+                      <Badge variante="default" className="bg-white/90 text-gray-800">
+                        {immeuble.type === "TRIPLEX" ? "Triplex" : "Duplex"}
+                      </Badge>
+                      <span className="rounded-full bg-white/90 px-2.5 py-0.5 text-xs font-semibold text-gray-800">
+                        {formatCAD(revMensuels)}/mois
+                      </span>
                     </div>
-                  )}
+                  </div>
 
                   {/* Contenu */}
                   <div className="p-5">
