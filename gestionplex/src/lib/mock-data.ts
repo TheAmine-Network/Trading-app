@@ -26,7 +26,7 @@ export const immeubles: Immeuble[] = [
     valeurMunicipale: 776100,
     numeroLot: "1219812",
     notes:
-      "Triplex acheté oct. 2023. Refinancé déc. 2025 (First National #1386552). " +
+      "Triplex acheté oct. 2023. Refinancé déc. 2025 (BNC — Banque Nationale). " +
       "Matricule : 65005 8445 78 3147 1 000 0000. Rôle 2025-2027 : 776 100 $. " +
       "2 étages · 371,60 m² · mesure frontale 15,24 m. " +
       "Évaluation marchande : 849 000 $ (RE/MAX du Cartier, sept. 2025). " +
@@ -358,17 +358,34 @@ function genererTransactions(): Transaction[] {
         createdAt: date,
         updatedAt: date,
       },
+      // Hypothèque BNC — 1 597 $ aux deux semaines (versements ~1er et ~15 du mois)
       {
-        id: `tx_hyp_lav_${i}`,
+        id: `tx_hyp_lav_v1_${i}`,
         immeubleId: "imm_triplex_laval",
         type: "DEPENSE",
         categorie: "HYPOTHEQUE",
-        montant: 3850,
-        date: new Date(date.getFullYear(), date.getMonth(), 5),
-        description: "Hypothèque First National #1386552 — Triplex Laval",
+        montant: 1597,
+        date: new Date(date.getFullYear(), date.getMonth(), 1),
+        description: "Hypothèque BNC — Triplex Laval (versement aux 2 sem.)",
+        fournisseur: "BNC — Banque Nationale du Canada",
         methodePaiement: "PRELEVEMENT",
         recurrent: true,
-        recurrenceJour: 5,
+        recurrenceJour: 1,
+        createdAt: date,
+        updatedAt: date,
+      },
+      {
+        id: `tx_hyp_lav_v2_${i}`,
+        immeubleId: "imm_triplex_laval",
+        type: "DEPENSE",
+        categorie: "HYPOTHEQUE",
+        montant: 1597,
+        date: new Date(date.getFullYear(), date.getMonth(), 15),
+        description: "Hypothèque BNC — Triplex Laval (versement aux 2 sem.)",
+        fournisseur: "BNC — Banque Nationale du Canada",
+        methodePaiement: "PRELEVEMENT",
+        recurrent: true,
+        recurrenceJour: 15,
         createdAt: date,
         updatedAt: date,
       }
