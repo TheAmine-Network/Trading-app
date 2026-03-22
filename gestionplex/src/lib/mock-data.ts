@@ -22,10 +22,12 @@ export const immeubles: Immeuble[] = [
     photoUrl: "https://images.unsplash.com/photo-1568605114967-8130f3a36994?w=800",
     dateAchat: new Date("2023-10-01"),
     prixAchat: 749000,
-    valeurMunicipale: 571300,
-    numeroLot: "Centris #21607760",
+    valeurMunicipale: 776100,
+    numeroLot: "1219812",
     notes:
       "Triplex acheté oct. 2023. Refinancé déc. 2025 (First National #1386552). " +
+      "Matricule : 65005 8445 78 3147 1 000 0000. Rôle 2025-2027 : 776 100 $. " +
+      "2 étages · 371,60 m² · mesure frontale 15,24 m. " +
       "Évaluation marchande : 849 000 $ (RE/MAX du Cartier, sept. 2025). " +
       "Certificat de localisation 2009 — à mettre à jour.",
     createdAt: new Date("2023-10-01"),
@@ -59,7 +61,7 @@ export const immeubles: Immeuble[] = [
 // ─── LOGEMENTS ───────────────────────────────────────────────────────────────
 
 export const logements: Logement[] = [
-  // ── Triplex Laval — 1671 ──
+  // ── Triplex Laval — 1671 (Mohamad Salma) ──
   {
     id: "log_lav_1671",
     immeubleId: "imm_triplex_laval",
@@ -68,7 +70,7 @@ export const logements: Logement[] = [
     nbChambres: 3,
     nbSallesBain: 1,
     statut: "OCCUPE",
-    loyerMensuel: 1200,
+    loyerMensuel: 1285,
     inclChauffage: false,
     inclEauChaude: false,
     inclElectricite: false,
@@ -76,14 +78,14 @@ export const logements: Logement[] = [
     inclRangement: false,
     photos: [],
     notes:
-      "5 pièces. Bail expiré juin 2024 — renouvelé. " +
+      "5 pièces. Bail renouvelé 2025-06-30 → 2026-06-30 · 1 285 $/mois (+4,90 % TAL). " +
       "Plafond avec cernes d'eau (dégât antérieur). " +
       "Panneau électrique 100A cuivre PLEIN — hotte cuisine sans couvercle. " +
       "Moustiquaire cuisine endommagée.",
     createdAt: new Date("2023-10-01"),
-    updatedAt: new Date("2026-01-01"),
+    updatedAt: new Date("2025-06-30"),
   },
-  // ── Triplex Laval — 1675 ──
+  // ── Triplex Laval — 1675 (Jennifer Bindala) ──
   {
     id: "log_lav_1675",
     immeubleId: "imm_triplex_laval",
@@ -92,7 +94,7 @@ export const logements: Logement[] = [
     nbChambres: 3,
     nbSallesBain: 1,
     statut: "OCCUPE",
-    loyerMensuel: 950,
+    loyerMensuel: 2000,
     inclChauffage: false,
     inclEauChaude: false,
     inclElectricite: false,
@@ -100,14 +102,14 @@ export const logements: Logement[] = [
     inclRangement: false,
     photos: [],
     notes:
-      "5 pièces. Bail expiré juin 2024 — renouvelé. " +
+      "5 pièces. Locataire : Ezechielle-Jennifer Bindala · 2 000 $/mois. Avis augmentation envoyé 2026. " +
       "Prises élec. cuisine non fonctionnelles. Panneau 100A PLEIN, disjoncteurs non identifiés. " +
       "Plafonds avec cernes d'eau. Portes intérieures endommagées. " +
       "Robinetterie lavabo mal fixée.",
     createdAt: new Date("2023-10-01"),
     updatedAt: new Date("2026-01-01"),
   },
-  // ── Triplex Laval — 1671A ──
+  // ── Triplex Laval — 1671A (Lyes Sadaoui) ──
   {
     id: "log_lav_1671a",
     immeubleId: "imm_triplex_laval",
@@ -116,7 +118,7 @@ export const logements: Logement[] = [
     nbChambres: 2,
     nbSallesBain: 1,
     statut: "OCCUPE",
-    loyerMensuel: 1150,
+    loyerMensuel: 1190,
     inclChauffage: false,
     inclEauChaude: false,
     inclElectricite: false,
@@ -124,13 +126,14 @@ export const logements: Logement[] = [
     inclRangement: false,
     photos: [],
     notes:
-      "4 pièces. Bail expiré juin 2024 — renouvelé. " +
+      "4 pièces. Bail 2025-06-30 → 2026-06-30 · 1 190 $/mois. " +
+      "Renouvellement proposé 2026-06-30 → 2027-06-30 · 1 220 $/mois (+2,60 % TAL). Avis envoyé 2026-02-19. " +
       "DANGER: panneau élec. 200A — ouvertures non obturées (maître électricien urgent). " +
       "Fenêtre avant: infiltration d'eau + moisissures/pourriture sur cadrage. " +
       "Plinthes électriques non fonctionnelles (inspection sept. 2023). " +
       "Chauffe-eau remplacé sept. 2025 (Confort Expert/HydroSolution).",
     createdAt: new Date("2023-10-01"),
-    updatedAt: new Date("2026-01-01"),
+    updatedAt: new Date("2026-02-19"),
   },
   // ── Duplex Anjou — 8452 (haut, vacant) ──
   {
@@ -184,87 +187,117 @@ export const logements: Logement[] = [
 // ─── LOCATAIRES ──────────────────────────────────────────────────────────────
 
 export const locataires: Locataire[] = [
+  // ── Triplex Laval — locataires actifs ──
   {
     id: "loc_lav_001",
     logementId: "log_lav_1671",
-    prenom: "Linda",
-    nom: "Bouchard",
-    email: "linda.bouchard@gmail.com",
-    telephone: "450-555-3412",
+    prenom: "Mohamad",
+    nom: "Salma",
+    email: "",
+    telephone: "",
     statut: "ACTIF",
-    notes: "Locataire depuis 2021. Bail renouvelé 2024. Loyer 1 200 $/mois.",
-    createdAt: new Date("2021-07-01"),
-    updatedAt: new Date("2024-07-01"),
+    notes: "1671 Rue Hébert · 1 285 $/mois · bail 2025-06-30 → 2026-06-30 (+4,90 % TAL). RL-31 émis 2023, 2024, 2025.",
+    createdAt: new Date("2023-10-01"),
+    updatedAt: new Date("2025-06-30"),
   },
   {
     id: "loc_lav_002",
     logementId: "log_lav_1675",
-    prenom: "Kevin",
-    nom: "Ouellet",
-    email: "k.ouellet@outlook.com",
-    telephone: "450-555-8820",
+    prenom: "Ezechielle-Jennifer",
+    nom: "Bindala",
+    email: "",
+    telephone: "",
     statut: "ACTIF",
-    notes: "Locataire depuis 2022. Loyer 950 $/mois. Inclusions : électroménagers sous-sol.",
-    createdAt: new Date("2022-09-01"),
-    updatedAt: new Date("2024-07-01"),
+    notes: "1675 Rue Hébert · 2 000 $/mois. Avis TAL d'augmentation envoyé 2026. Anciens locataires : Jennifer Philip (2023), Karim Chebbi (2024).",
+    createdAt: new Date("2025-07-01"),
+    updatedAt: new Date("2026-01-01"),
   },
   {
     id: "loc_lav_003",
     logementId: "log_lav_1671a",
-    prenom: "Nadia",
-    nom: "Perreault",
-    email: "nadia.perreault@hotmail.com",
-    telephone: "450-555-6671",
+    prenom: "Lyes",
+    nom: "Sadaoui",
+    email: "",
+    telephone: "",
     statut: "ACTIF",
-    notes: "Locataire depuis 2020. Loyer 1 150 $/mois. A signalé les plinthes non fonctionnelles.",
-    createdAt: new Date("2020-10-01"),
-    updatedAt: new Date("2024-07-01"),
+    notes: "1671A Rue Hébert · 1 190 $/mois · bail 2025-06-30 → 2026-06-30. Renouvellement proposé 1 220 $/mois (+2,60 %) du 2026-06-30 au 2027-06-30. Avis envoyé 2026-02-19. RL-31 émis 2023, 2024, 2025.",
+    createdAt: new Date("2023-10-01"),
+    updatedAt: new Date("2026-02-19"),
+  },
+  // ── Anciens locataires ──
+  {
+    id: "loc_lav_004",
+    logementId: "log_lav_1675",
+    prenom: "Karim",
+    nom: "Chebbi",
+    email: "",
+    telephone: "",
+    statut: "ANCIEN",
+    notes: "1675 Rue Hébert — locataire 2024. RL-31 émis 2024. Remplacé par Jennifer Bindala.",
+    createdAt: new Date("2024-07-01"),
+    updatedAt: new Date("2025-06-30"),
+  },
+  {
+    id: "loc_lav_005",
+    logementId: "log_lav_1675",
+    prenom: "Jennifer",
+    nom: "Philip",
+    email: "",
+    telephone: "",
+    statut: "ANCIEN",
+    notes: "1675 Rue Hébert — locataire 2023. RL-31 émis 2023.",
+    createdAt: new Date("2023-07-01"),
+    updatedAt: new Date("2024-06-30"),
   },
 ];
 
 // ─── BAUX ────────────────────────────────────────────────────────────────────
 
 export const baux: Bail[] = [
+  // ── 1671 — Mohamad Salma (bail actif) ──
   {
     id: "bail_lav_001",
     logementId: "log_lav_1671",
     locataireId: "loc_lav_001",
-    dateDebut: new Date("2024-07-01"),
-    dateFin: new Date("2025-06-30"),
-    loyerMensuel: 1200,
-    statut: "EXPIRE",
-    augmentationAnnuelle: 0.9,
+    dateDebut: new Date("2025-06-30"),
+    dateFin: new Date("2026-06-30"),
+    loyerMensuel: 1285,
+    statut: "ACTIF",
+    augmentationAnnuelle: 4.9,
     sectionG: true,
-    clausesSpeciales: "Bail original expiré 2024-06-30. Reconduit tacitement.",
-    createdAt: new Date("2021-07-01"),
-    updatedAt: new Date("2024-07-01"),
+    clausesSpeciales: "Avis TAL envoyé 2025-03-01. Loyer augmenté de 1 225 $ à 1 285 $ (+4,90 % TAL 2025).",
+    createdAt: new Date("2023-10-01"),
+    updatedAt: new Date("2025-06-30"),
   },
+  // ── 1675 — Jennifer Bindala (bail actif) ──
   {
     id: "bail_lav_002",
     logementId: "log_lav_1675",
     locataireId: "loc_lav_002",
-    dateDebut: new Date("2024-07-01"),
-    dateFin: new Date("2025-06-30"),
-    loyerMensuel: 950,
-    statut: "EXPIRE",
+    dateDebut: new Date("2025-07-01"),
+    dateFin: new Date("2026-06-30"),
+    loyerMensuel: 2000,
+    statut: "EN_RENOUVELLEMENT",
     augmentationAnnuelle: 0.9,
     sectionG: true,
-    clausesSpeciales: "Électroménagers sous-sol inclus selon bail. RDC et 2e étage exclus.",
-    createdAt: new Date("2022-09-01"),
-    updatedAt: new Date("2024-07-01"),
+    clausesSpeciales: "Avis TAL envoyé 2026. Loyer actuel : 2 000 $/mois. Renouvellement en cours.",
+    createdAt: new Date("2025-07-01"),
+    updatedAt: new Date("2026-01-01"),
   },
+  // ── 1671A — Lyes Sadaoui (bail actif, renouvellement proposé) ──
   {
     id: "bail_lav_003",
     logementId: "log_lav_1671a",
     locataireId: "loc_lav_003",
-    dateDebut: new Date("2024-07-01"),
-    dateFin: new Date("2025-06-30"),
-    loyerMensuel: 1150,
+    dateDebut: new Date("2025-06-30"),
+    dateFin: new Date("2026-06-30"),
+    loyerMensuel: 1190,
     statut: "EN_RENOUVELLEMENT",
-    augmentationAnnuelle: 0.9,
+    augmentationAnnuelle: 2.6,
     sectionG: true,
-    createdAt: new Date("2020-10-01"),
-    updatedAt: new Date("2024-07-01"),
+    clausesSpeciales: "Avis TAL envoyé 2026-02-19. Renouvellement proposé : 1 220 $/mois (+2,60 %) du 2026-06-30 au 2027-06-30.",
+    createdAt: new Date("2023-10-01"),
+    updatedAt: new Date("2026-02-19"),
   },
 ];
 
@@ -274,7 +307,7 @@ function genererTransactions(): Transaction[] {
   const transactions: Transaction[] = [];
   const maintenant = new Date();
 
-  // Loyers Triplex Laval — 6 derniers mois
+  // Loyers Triplex Laval — 6 derniers mois (loyers réels)
   for (let i = 5; i >= 0; i--) {
     const date = new Date(maintenant.getFullYear(), maintenant.getMonth() - i, 1);
     transactions.push(
@@ -284,9 +317,9 @@ function genererTransactions(): Transaction[] {
         logementId: "log_lav_1671",
         type: "REVENU",
         categorie: "LOYER",
-        montant: 1200,
+        montant: 1285,
         date: new Date(date.getFullYear(), date.getMonth(), 1),
-        description: "Loyer — 1671 (Linda Bouchard)",
+        description: `Loyer — 1671 (Mohamad Salma)`,
         methodePaiement: "VIREMENT",
         recurrent: true,
         recurrenceJour: 1,
@@ -299,9 +332,9 @@ function genererTransactions(): Transaction[] {
         logementId: "log_lav_1675",
         type: "REVENU",
         categorie: "LOYER",
-        montant: 950,
+        montant: 2000,
         date: new Date(date.getFullYear(), date.getMonth(), 1),
-        description: "Loyer — 1675 (Kevin Ouellet)",
+        description: `Loyer — 1675 (Jennifer Bindala)`,
         methodePaiement: "VIREMENT",
         recurrent: true,
         recurrenceJour: 1,
@@ -314,9 +347,9 @@ function genererTransactions(): Transaction[] {
         logementId: "log_lav_1671a",
         type: "REVENU",
         categorie: "LOYER",
-        montant: 1150,
+        montant: 1190,
         date: new Date(date.getFullYear(), date.getMonth(), 1),
-        description: "Loyer — 1671A (Nadia Perreault)",
+        description: "Loyer — 1671A (Lyes Sadaoui)",
         methodePaiement: "PRELEVEMENT",
         recurrent: true,
         recurrenceJour: 1,
@@ -340,35 +373,111 @@ function genererTransactions(): Transaction[] {
     );
   }
 
-  // Dépenses ponctuelles Laval
+  // Dépenses ponctuelles Laval — données réelles
   transactions.push(
+    // ── Taxes foncières 2025 (5 124,78 $ — 2 versements) ──
     {
-      id: "tx_taxes_mun_lav",
+      id: "tx_taxes_mun_lav_2025_v1",
       immeubleId: "imm_triplex_laval",
-      type: "DEPENSE",
+      type: "DEPENSE_EXPLOITATION",
       categorie: "TAXES_MUNICIPALES",
-      montant: 5043,
-      date: new Date(maintenant.getFullYear(), 0, 31),
-      description: "Taxes municipales 2023 — Triplex Laval",
+      montant: 2515.43,
+      date: new Date("2025-03-19"),
+      description: "Taxes foncières 2025 — Versement 1 · 1671-1675 Hébert (Ville de Laval · facture AN2025-000040032)",
       fournisseur: "Ville de Laval",
-      methodePaiement: "PRELEVEMENT",
-      recurrent: true,
-      createdAt: new Date(maintenant.getFullYear(), 0, 31),
-      updatedAt: new Date(maintenant.getFullYear(), 0, 31),
+      methodePaiement: "VIREMENT",
+      recurrent: false,
+      createdAt: new Date("2025-03-19"),
+      updatedAt: new Date("2025-03-19"),
     },
     {
-      id: "tx_taxes_sco_lav",
+      id: "tx_taxes_mun_lav_2025_v2",
       immeubleId: "imm_triplex_laval",
-      type: "DEPENSE",
+      type: "DEPENSE_EXPLOITATION",
+      categorie: "TAXES_MUNICIPALES",
+      montant: 2609.35,
+      date: new Date("2025-06-17"),
+      description: "Taxes foncières 2025 — Versement 2 · 1671-1675 Hébert (Ville de Laval · facture AN2025-000040032)",
+      fournisseur: "Ville de Laval",
+      methodePaiement: "VIREMENT",
+      recurrent: false,
+      createdAt: new Date("2025-06-17"),
+      updatedAt: new Date("2025-06-17"),
+    },
+    // ── Taxes foncières 2026 (5 640,58 $ — 2 versements) ──
+    {
+      id: "tx_taxes_mun_lav_2026_v1",
+      immeubleId: "imm_triplex_laval",
+      type: "DEPENSE_EXPLOITATION",
+      categorie: "TAXES_MUNICIPALES",
+      montant: 2820.29,
+      date: new Date("2026-03-18"),
+      description: "Taxes foncières 2026 — Versement 1 · 1671-1675 Hébert (Ville de Laval · facture AN2026-000180113)",
+      fournisseur: "Ville de Laval",
+      methodePaiement: "VIREMENT",
+      recurrent: false,
+      createdAt: new Date("2026-03-18"),
+      updatedAt: new Date("2026-03-18"),
+    },
+    {
+      id: "tx_taxes_mun_lav_2026_v2",
+      immeubleId: "imm_triplex_laval",
+      type: "DEPENSE_EXPLOITATION",
+      categorie: "TAXES_MUNICIPALES",
+      montant: 2820.29,
+      date: new Date("2026-06-16"),
+      description: "Taxes foncières 2026 — Versement 2 · 1671-1675 Hébert (Ville de Laval · facture AN2026-000180113)",
+      fournisseur: "Ville de Laval",
+      methodePaiement: "VIREMENT",
+      recurrent: false,
+      createdAt: new Date("2026-06-16"),
+      updatedAt: new Date("2026-06-16"),
+    },
+    // ── Taxe scolaire 2025-2026 (517,65 $ — 2 versements) ──
+    {
+      id: "tx_taxes_sco_lav_2025_v1",
+      immeubleId: "imm_triplex_laval",
+      type: "DEPENSE_EXPLOITATION",
       categorie: "TAXES_SCOLAIRES",
-      montant: 488,
-      date: new Date(maintenant.getFullYear(), 7, 15),
-      description: "Taxes scolaires 2023 — Triplex Laval",
-      fournisseur: "CS des Samares",
-      methodePaiement: "CHEQUE",
-      recurrent: true,
-      createdAt: new Date(maintenant.getFullYear(), 7, 15),
-      updatedAt: new Date(maintenant.getFullYear(), 7, 15),
+      montant: 258.83,
+      date: new Date("2025-09-04"),
+      description: "Taxe scolaire 2025-2026 — Versement 1 · 1671-1675 Hébert (CSS Laval · compte 00054937)",
+      fournisseur: "Centre de services scolaire de Laval",
+      methodePaiement: "VIREMENT",
+      recurrent: false,
+      createdAt: new Date("2025-09-04"),
+      updatedAt: new Date("2025-09-04"),
+    },
+    {
+      id: "tx_taxes_sco_lav_2025_v2",
+      immeubleId: "imm_triplex_laval",
+      type: "DEPENSE_EXPLOITATION",
+      categorie: "TAXES_SCOLAIRES",
+      montant: 258.82,
+      date: new Date("2025-11-06"),
+      description: "Taxe scolaire 2025-2026 — Versement 2 · 1671-1675 Hébert (CSS Laval · compte 00054937)",
+      fournisseur: "Centre de services scolaire de Laval",
+      methodePaiement: "VIREMENT",
+      recurrent: false,
+      createdAt: new Date("2025-11-06"),
+      updatedAt: new Date("2025-11-06"),
+    },
+    // ── Facture Home Depot — toilette + calfeutrage (2026-03-19) ──
+    {
+      id: "tx_homedepot_toilette_2026",
+      immeubleId: "imm_triplex_laval",
+      type: "DEPENSE_EXPLOITATION",
+      categorie: "REPARATION",
+      montant: 232.04,
+      date: new Date("2026-03-19"),
+      description: "Home Depot — Toilette Glacier Bay 6L + scellant silicone + outils calfeutrage (cmd #0241069918)",
+      fournisseur: "Home Depot Canada",
+      methodePaiement: "VIREMENT",
+      recurrent: false,
+      notes: "Toilette 99,00 $ + silicone 6,87 $ + trousse 9,97 $ + pistolet 25,97 $ + livraison 60 $ + TPS/TVQ 30,23 $ = 232,04 $. Livré 1671 Hébert, Laval.",
+      recuUrl: "/Rent/Factures 2026/Confirmation de commande _ Home Depot Canada Facture toilette et autre 2026.pdf",
+      createdAt: new Date("2026-03-19"),
+      updatedAt: new Date("2026-03-19"),
     },
     {
       id: "tx_notaire_lav_refin",
