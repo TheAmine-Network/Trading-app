@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { Wrench, Plus, X, ChevronRight, AlertTriangle, Clock } from "lucide-react";
+import { Wrench, Plus, X, ChevronRight, AlertTriangle, Clock, CheckCheck, SlidersHorizontal } from "lucide-react";
 import Link from "next/link";
 import { useAppData } from "@/lib/DataContext";
 import { formatDate } from "@/lib/formatters";
@@ -32,6 +32,8 @@ export function EntretienListe() {
   const [onglet, setOnglet] = useState<Statut>("ouvertes");
   const [prioriteFiltree, setPrioriteFiltree] = useState<Priorite>("TOUTES");
   const [formulaireOuvert, setFormulaireOuvert] = useState(false);
+  const [modeGestion, setModeGestion] = useState(false);
+  const [enCours, setEnCours] = useState<Record<string, boolean>>({});
 
   async function changerStatut(id: string, statut: string) {
     await fetch(`/api/entretien/${id}`, {
@@ -40,6 +42,20 @@ export function EntretienListe() {
       body: JSON.stringify({ statut }),
     });
     refresh();
+  }
+
+  async function actionRapide(id: string, statut: "TERMINEE" | "ANNULEE") {
+    setEnCours(p => ({ ...p, [id]: true }));
+    await changerStatut(id, statut);
+    setEnCours(p => ({ ...p, [id]: false }));
+  }
+
+  async function toutTerminer() {
+    const ouvertes = demandesEntretien.filter(
+      d => d.statut !== "TERMINEE" && d.statut !== "ANNULEE"
+    );
+    await Promise.all(ouvertes.map(d => changerStatut(d.id, "TERMINEE")));
+    setModeGestion(false);
   }
   const [titreNouveau, setTitreNouveau] = useState("");
   const [descNouveau, setDescNouveau] = useState("");
@@ -71,15 +87,59 @@ export function EntretienListe() {
               {nbOuvertes} demande{nbOuvertes !== 1 ? "s" : ""} ouverte{nbOuvertes !== 1 ? "s" : ""}
             </p>
           </div>
-          <motion.button
-            whileTap={{ scale: 0.92 }}
-            onClick={() => setFormulaireOuvert(true)}
-            className="flex items-center gap-1.5 rounded-xl bg-blue-600 px-3 py-2 text-sm font-medium text-white"
-          >
-            <Plus className="h-4 w-4" />
-            Nouvelle demande
-          </motion.button>
+          <div className="flex items-center gap-2">
+            {onglet === "ouvertes" && nbOuvertes > 0 && (
+              <motion.button
+                whileTap={{ scale: 0.92 }}
+                onClick={() => setModeGestion(v => !v)}
+                className={`flex items-center gap-1.5 rounded-xl px-3 py-2 text-sm font-medium transition-colors ${
+                  modeGestion
+                    ? "bg-orange-500 text-white"
+                    : "bg-gray-100 text-gray-700 dark:bg-gray-800 dark:text-gray-300"
+                }`}
+              >
+                <SlidersHorizontal className="h-4 w-4" />
+                {modeGestion ? "Terminer" : "Gérer"}
+              </motion.button>
+            )}
+            {!modeGestion && (
+              <motion.button
+                whileTap={{ scale: 0.92 }}
+                onClick={() => setFormulaireOuvert(true)}
+                className="flex items-center gap-1.5 rounded-xl bg-blue-600 px-3 py-2 text-sm font-medium text-white"
+              >
+                <Plus className="h-4 w-4" />
+                Nouvelle
+              </motion.button>
+            )}
+          </div>
         </div>
+
+        {/* Barre d'actions mode gestion */}
+        <AnimatePresence>
+          {modeGestion && (
+            <motion.div
+              initial={{ opacity: 0, height: 0 }}
+              animate={{ opacity: 1, height: "auto" }}
+              exit={{ opacity: 0, height: 0 }}
+              className="overflow-hidden"
+            >
+              <div className="mt-3 flex items-center gap-2 rounded-xl border border-green-200 bg-green-50 px-3 py-2.5 dark:border-green-900/50 dark:bg-green-950/30">
+                <CheckCheck className="h-4 w-4 text-green-600 flex-shrink-0" />
+                <p className="flex-1 text-xs text-green-700 dark:text-green-400">
+                  Tapez ✓ pour terminer ou ✕ pour annuler chaque demande
+                </p>
+                <motion.button
+                  whileTap={{ scale: 0.95 }}
+                  onClick={toutTerminer}
+                  className="flex-shrink-0 rounded-lg bg-green-600 px-3 py-1.5 text-xs font-semibold text-white"
+                >
+                  Tout fermer
+                </motion.button>
+              </div>
+            </motion.div>
+          )}
+        </AnimatePresence>
       </div>
 
       <div className="px-5 py-4 space-y-4">
@@ -199,9 +259,35 @@ export function EntretienListe() {
                         </div>
                       </div>
 
-                      <Link href={`/entretien/${demande.id}`}>
-                        <ChevronRight className="mt-1 h-4 w-4 flex-shrink-0" style={{ color: "var(--fg-subtle)" }} />
-                      </Link>
+                      {modeGestion ? (
+                        <div className="flex flex-col gap-1.5 flex-shrink-0">
+                          <motion.button
+                            whileTap={{ scale: 0.88 }}
+                            onClick={() => actionRapide(demande.id, "TERMINEE")}
+                            disabled={enCours[demande.id]}
+                            className="flex h-9 w-9 items-center justify-center rounded-xl bg-green-500 text-white disabled:opacity-50"
+                            title="Terminer"
+                          >
+                            {enCours[demande.id]
+                              ? <span className="h-3.5 w-3.5 animate-spin rounded-full border-2 border-white border-t-transparent" />
+                              : <span className="text-base leading-none">✓</span>
+                            }
+                          </motion.button>
+                          <motion.button
+                            whileTap={{ scale: 0.88 }}
+                            onClick={() => actionRapide(demande.id, "ANNULEE")}
+                            disabled={enCours[demande.id]}
+                            className="flex h-9 w-9 items-center justify-center rounded-xl bg-gray-200 text-gray-600 disabled:opacity-50 dark:bg-gray-700 dark:text-gray-300"
+                            title="Annuler"
+                          >
+                            <span className="text-base leading-none">✕</span>
+                          </motion.button>
+                        </div>
+                      ) : (
+                        <Link href={`/entretien/${demande.id}`}>
+                          <ChevronRight className="mt-1 h-4 w-4 flex-shrink-0" style={{ color: "var(--fg-subtle)" }} />
+                        </Link>
+                      )}
                     </div>
                   </motion.div>
                 </StaggerItem>
