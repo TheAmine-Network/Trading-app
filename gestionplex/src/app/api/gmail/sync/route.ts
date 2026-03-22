@@ -11,12 +11,8 @@ export async function GET(request: NextRequest) {
     return NextResponse.json({ error: "Gmail non connecté", connected: false }, { status: 401 });
   }
 
-  // Mode démo — retourne des emails simulés sans credentials réels
-  const { searchParams } = new URL(request.url);
-  const demo = searchParams.get("demo") === "true";
-
-  if (demo || !process.env.GOOGLE_CLIENT_ID) {
-    return NextResponse.json({ emails: getEmailsDemo(), connected: true, source: "demo" });
+  if (!process.env.GOOGLE_CLIENT_ID) {
+    return NextResponse.json({ error: "Gmail non configuré", connected: false }, { status: 401 });
   }
 
   try {
