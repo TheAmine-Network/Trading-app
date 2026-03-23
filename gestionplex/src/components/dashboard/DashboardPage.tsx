@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect, useCallback } from "react";
+import { useState, useEffect, useCallback, useMemo } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import {
   TrendingUp,
@@ -134,32 +134,50 @@ export function DashboardPage() {
 
   useEffect(() => { fetchGmailEmails(); }, [fetchGmailEmails]);
 
-  const maintenant = new Date();
-  const statsActuels = statsFinancieresMois(transactions, maintenant.getFullYear(), maintenant.getMonth());
-  const statsMoisPrec = statsFinancieresMois(transactions, maintenant.getFullYear(), maintenant.getMonth() - 1);
-  const donneesMois = statsParMois(transactions, 6);
+  const maintenant = useMemo(() => new Date(), []);
+
+  const statsActuels = useMemo(
+    () => statsFinancieresMois(transactions, maintenant.getFullYear(), maintenant.getMonth()),
+    [transactions, maintenant]
+  );
+  const statsMoisPrec = useMemo(
+    () => statsFinancieresMois(transactions, maintenant.getFullYear(), maintenant.getMonth() - 1),
+    [transactions, maintenant]
+  );
+  const donneesMois = useMemo(() => statsParMois(transactions, 6), [transactions]);
   const { nbOccupes, nbTotal, taux } = getTauxOccupation();
 
   // ── Loyers manquants ce mois ────────────────────────────────────────────────
-  const debutMois = new Date(maintenant.getFullYear(), maintenant.getMonth(), 1);
-  const finMois   = new Date(maintenant.getFullYear(), maintenant.getMonth() + 1, 0);
-  const logementIdsAvecLoyer = new Set(
-    transactions
-      .filter(t => t.type === "REVENU" && t.categorie === "LOYER" &&
-        new Date(t.date) >= debutMois && new Date(t.date) <= finMois)
-      .map(t => t.logementId)
-      .filter(Boolean)
+  const debutMois = useMemo(
+    () => new Date(maintenant.getFullYear(), maintenant.getMonth(), 1),
+    [maintenant]
   );
-  const loyersManquants = baux
-    .filter(b => b.statut === "ACTIF" && !logementIdsAvecLoyer.has(b.logementId))
-    .map(b => ({
-      bail: b,
-      logement: logements.find(l => l.id === b.logementId),
-      locataire: locataires.find(l => l.id === b.locataireId),
-      immeuble: immeubles.find(i => i.id === logements.find(l => l.id === b.logementId)?.immeubleId),
-    }))
-    .filter(e => e.logement?.statut === "OCCUPE");
-  const totalLoyersManquants = loyersManquants.reduce((s, e) => s + e.bail.loyerMensuel, 0);
+  const finMois = useMemo(
+    () => new Date(maintenant.getFullYear(), maintenant.getMonth() + 1, 0),
+    [maintenant]
+  );
+  const loyersManquants = useMemo(() => {
+    const idsAvecLoyer = new Set(
+      transactions
+        .filter(t => t.type === "REVENU" && t.categorie === "LOYER" &&
+          new Date(t.date) >= debutMois && new Date(t.date) <= finMois)
+        .map(t => t.logementId)
+        .filter(Boolean)
+    );
+    return baux
+      .filter(b => b.statut === "ACTIF" && !idsAvecLoyer.has(b.logementId))
+      .map(b => ({
+        bail: b,
+        logement: logements.find(l => l.id === b.logementId),
+        locataire: locataires.find(l => l.id === b.locataireId),
+        immeuble: immeubles.find(i => i.id === logements.find(l => l.id === b.logementId)?.immeubleId),
+      }))
+      .filter(e => e.logement?.statut === "OCCUPE");
+  }, [transactions, baux, logements, locataires, immeubles, debutMois, finMois]);
+  const totalLoyersManquants = useMemo(
+    () => loyersManquants.reduce((s, e) => s + e.bail.loyerMensuel, 0),
+    [loyersManquants]
+  );
 
   async function genererTousLesLoyers() {
     setGeneratingLoyers(true);
@@ -193,12 +211,21 @@ export function DashboardPage() {
   const tendanceDepenses = statsMoisPrec.depenses > 0
     ? ((statsActuels.depenses - statsMoisPrec.depenses) / statsMoisPrec.depenses) * 100 : 0;
 
-  const demandesOuvertes = demandesEntretien.filter(d => d.statut !== "TERMINEE" && d.statut !== "ANNULEE");
-  const rappelsActifs = rappels.filter(r => r.statut === "ACTIF").slice(0, 3);
+  const demandesOuvertes = useMemo(
+    () => demandesEntretien.filter(d => d.statut !== "TERMINEE" && d.statut !== "ANNULEE"),
+    [demandesEntretien]
+  );
+  const rappelsActifs = useMemo(
+    () => rappels.filter(r => r.statut === "ACTIF").slice(0, 3),
+    [rappels]
+  );
 
   const jourSemaine = maintenant.toLocaleDateString("fr-CA", { weekday: "long" });
   const dateAujourd = maintenant.toLocaleDateString("fr-CA", { day: "numeric", month: "long" });
-  const emailsRestants = gmailEmails.filter(e => !emailsTraites.has(e.id));
+  const emailsRestants = useMemo(
+    () => gmailEmails.filter(e => !emailsTraites.has(e.id)),
+    [gmailEmails, emailsTraites]
+  );
 
   return (
     <div className="min-h-screen" style={{ background: "var(--bg)" }}>

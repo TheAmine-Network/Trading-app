@@ -1,5 +1,6 @@
 "use client";
 
+import { useMemo } from "react";
 import { motion } from "framer-motion";
 import { Building2, MapPin, Home } from "lucide-react";
 import { SatelliteView } from "@/components/ui/MapMini";
@@ -28,6 +29,23 @@ function StatutBadge({ statut }: { statut: string }) {
 
 export function ImmeublesListe() {
   const { immeubles, logements, refresh } = useAppData();
+
+  const summaryStats = useMemo(() => {
+    const occupes = logements.filter(l => l.statut === "OCCUPE");
+    return [
+      { label: "Immeubles",    valeur: String(immeubles.length) },
+      { label: "Occupés",      valeur: `${occupes.length}/${logements.length}` },
+      { label: "Revenus/mois", valeur: formatCAD(occupes.reduce((s, l) => s + l.loyerMensuel, 0)) },
+    ];
+  }, [immeubles, logements]);
+
+  const immeubleStats = useMemo(() =>
+    Object.fromEntries(immeubles.map(imm => {
+      const logs = logements.filter(l => l.immeubleId === imm.id);
+      const occupes = logs.filter(l => l.statut === "OCCUPE");
+      return [imm.id, { logs, nbOcc: occupes.length, revMensuels: occupes.reduce((s, l) => s + l.loyerMensuel, 0) }];
+    })),
+  [immeubles, logements]);
 
   async function updateLoyer(logementId: string, loyer: string) {
     await fetch(`/api/logements/${logementId}`, {
@@ -63,11 +81,7 @@ export function ImmeublesListe() {
       <div className="px-5 py-5">
         {/* Résumé */}
         <div className="mb-5 grid grid-cols-3 gap-3">
-          {[
-            { label: "Immeubles", valeur: String(immeubles.length) },
-            { label: "Occupés", valeur: `${logements.filter(l => l.statut === "OCCUPE").length}/${logements.length}` },
-            { label: "Revenus/mois", valeur: formatCAD(logements.filter(l => l.statut === "OCCUPE").reduce((s, l) => s + l.loyerMensuel, 0)) },
-          ].map(stat => (
+          {summaryStats.map(stat => (
             <div key={stat.label} className="card px-3 py-3 text-center">
               <p className="text-lg font-bold tabular-nums" style={{ color: "var(--fg)", letterSpacing: "-0.02em" }}>{stat.valeur}</p>
               <p className="text-xs" style={{ color: "var(--fg-muted)" }}>{stat.label}</p>
@@ -78,9 +92,7 @@ export function ImmeublesListe() {
         {/* Liste */}
         <StaggerChildren className="space-y-4">
           {immeubles.map(immeuble => {
-            const logsImm = logements.filter(l => l.immeubleId === immeuble.id);
-            const nbOcc = logsImm.filter(l => l.statut === "OCCUPE").length;
-            const revMensuels = logsImm.filter(l => l.statut === "OCCUPE").reduce((s, l) => s + l.loyerMensuel, 0);
+            const { logs: logsImm, nbOcc, revMensuels } = immeubleStats[immeuble.id] ?? { logs: [], nbOcc: 0, revMensuels: 0 };
 
             return (
               <StaggerItem key={immeuble.id}>

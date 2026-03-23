@@ -12,8 +12,7 @@ export default function ConnexionPage() {
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
     setChargement(true);
-    // Simulation d'envoi — à connecter à Supabase Auth
-    await new Promise((r) => setTimeout(r, 1500));
+    // TODO: connecter à Supabase Auth
     setEnvoyé(true);
     setChargement(false);
   }

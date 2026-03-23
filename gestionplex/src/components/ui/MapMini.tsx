@@ -49,7 +49,7 @@ export function SatelliteView({ address, label = "Vue satellite", className = ""
       width="100%"
       height="100%"
       style={{ border: 0, display: "block" }}
-      loading="eager"
+      loading="lazy"
       referrerPolicy="no-referrer"
       className={className}
       allowFullScreen

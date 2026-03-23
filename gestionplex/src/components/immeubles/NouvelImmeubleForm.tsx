@@ -199,8 +199,7 @@ export function NouvelImmeubleForm() {
     if (!form.centrisUrl.includes("centris.ca")) return;
     setCentrisLoading(true);
 
-    // Simulation d'extraction (en prod, utiliser une API de scraping autorisée)
-    await new Promise(r => setTimeout(r, 1800));
+    // TODO: utiliser une API de scraping autorisée en prod
 
     // Données simulées extraites de Centris
     setForm(prev => ({
